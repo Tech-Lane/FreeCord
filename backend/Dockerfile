@@ -3,6 +3,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
+# Copy NuGet config first (clears Windows fallback paths for Linux build)
+COPY nuget.config ./
+
 # Copy solution/project files for restore (layer caching)
 COPY ChatApp.Api/ChatApp.Api.csproj ChatApp.Api/
 COPY ChatApp.Core/ChatApp.Core.csproj ChatApp.Core/

@@ -207,11 +207,17 @@ public static class GuildEndpoints
         if (string.IsNullOrWhiteSpace(request.Name))
             return Results.BadRequest(new { error = "Channel name is required." });
 
-        var maxPosition = await db.Channels
-            .Where(c => c.GuildId == guildId && c.Type == request.Type)
-            .Select(c => (int?)c.Position)
+        // Load positions in-memory; EF Core/PostgreSQL may not translate enum cast in Where to SQL
+        var channelType = request.Type;
+        var positions = await db.Channels
+            .Where(c => c.GuildId == guildId)
+            .Select(c => new { c.Type, c.Position })
+            .ToListAsync();
+        var maxPosition = positions
+            .Where(p => p.Type == channelType)
+            .Select(p => p.Position)
             .DefaultIfEmpty(-1)
-            .MaxAsync();
+            .Max();
 
         var channel = new Channel
         {
@@ -219,7 +225,7 @@ public static class GuildEndpoints
             GuildId = guildId,
             Name = request.Name.Trim(),
             Type = request.Type,
-            Position = (maxPosition ?? -1) + 1,
+            Position = maxPosition + 1,
             CreatedAt = DateTime.UtcNow
         };
 

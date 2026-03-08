@@ -1,0 +1,57 @@
+<div class="modal-backdrop" (click)="onClose()" role="button" tabindex="0" (keydown.enter)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+    <header class="modal-header">
+      <h2 id="admin-modal-title">Server Admin - Pending Registrations</h2>
+      <button type="button" class="close-btn" (click)="onClose()" aria-label="Close">
+        &times;
+      </button>
+    </header>
+
+    <div class="modal-body">
+      @if (loading()) {
+        <p class="loading-msg">Loading...</p>
+      } @else if (error()) {
+        <p class="error-msg">{{ error() }}</p>
+      } @else if (pendingUsers().length === 0) {
+        <p class="empty-msg">No pending registrations.</p>
+      } @else {
+        <ul class="pending-list">
+          @for (user of pendingUsers(); track user.id) {
+            <li class="pending-item">
+              <div class="pending-info">
+                <span class="pending-username">{{ user.username }}</span>
+                <span class="pending-email">{{ user.email }}</span>
+                <span class="pending-date">Registered {{ formatDate(user.createdAt) }}</span>
+              </div>
+              <div class="pending-actions">
+                <button
+                  type="button"
+                  class="btn-approve"
+                  [disabled]="actionInProgress() !== null"
+                  (click)="approve(user)"
+                >
+                  Approve
+                </button>
+                <button
+                  type="button"
+                  class="btn-deny"
+                  [disabled]="actionInProgress() !== null"
+                  (click)="deny(user)"
+                >
+                  Deny
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="onClose()">Close</button>
+      @if (!loading() && !error() && pendingUsers().length > 0) {
+        <button type="button" class="btn-secondary" (click)="loadPending()">Refresh</button>
+      }
+    </footer>
+  </div>
+</div>

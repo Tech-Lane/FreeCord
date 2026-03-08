@@ -16,6 +16,7 @@ export interface UserProfile {
   id: string;
   username: string;
   customThemeCss: string;
+  isServerAdmin?: boolean;
 }
 
 /**
@@ -77,21 +78,14 @@ export class AuthService {
   }
 
   /**
-   * Registers a new user. Returns auth response with token.
+   * Registers a new user. New registrations require admin approval;
+   * response includes pendingApproval flag and does not include token.
    */
   register(username: string, email: string, password: string) {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, { username, email, password })
-      .pipe(
-        tap((res) => {
-          localStorage.setItem(this.storageKey, res.token);
-          localStorage.setItem(this.userKey, res.username);
-          localStorage.setItem(this.userIdKey, res.userId);
-          this.token.set(res.token);
-          this.username.set(res.username);
-          this.userId.set(res.userId);
-        })
-      );
+    return this.http.post<AuthResponse | { message: string; pendingApproval: boolean }>(
+      `${environment.apiUrl}/api/auth/register`,
+      { username, email, password }
+    );
   }
 
   /**
@@ -112,5 +106,17 @@ export class AuthService {
    */
   getToken(): string {
     return this.token();
+  }
+
+  /**
+   * Stores auth data from setup/initialize. Used after first-time setup creates the admin.
+   */
+  setSessionFromResponse(res: { token: string; userId: string; username: string }): void {
+    localStorage.setItem(this.storageKey, res.token);
+    localStorage.setItem(this.userKey, res.username);
+    localStorage.setItem(this.userIdKey, res.userId);
+    this.token.set(res.token);
+    this.username.set(res.username);
+    this.userId.set(res.userId);
   }
 }

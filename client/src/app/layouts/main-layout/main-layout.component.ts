@@ -5,6 +5,7 @@ import { ChannelListComponent } from '../../components/channel-list/channel-list
 import { ThemeSettingsModalComponent } from '../../components/theme-settings-modal/theme-settings-modal.component';
 import { CreateInviteModalComponent } from '../../components/create-invite-modal/create-invite-modal.component';
 import { VoiceChannelPanelComponent } from '../../components/voice-channel-panel/voice-channel-panel.component';
+import { AdminModalComponent } from '../../components/admin-modal/admin-modal.component';
 import { ApiService } from '../../services/api.service';
 import { ThemeService } from '../../services/theme.service';
 import { GuildChannelStateService } from '../../services/guild-channel-state.service';
@@ -26,7 +27,8 @@ import { VoiceRoomService } from '../../services/voice-room.service';
     RouterOutlet,
     ThemeSettingsModalComponent,
     CreateInviteModalComponent,
-    VoiceChannelPanelComponent
+    VoiceChannelPanelComponent,
+    AdminModalComponent
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
@@ -53,6 +55,12 @@ export class MainLayoutComponent implements OnInit {
   /** Controls visibility of the Create Invite modal */
   readonly showInviteModal = signal(false);
 
+  /** Controls visibility of the Server Admin modal (pending registrations) */
+  readonly showAdminModal = signal(false);
+
+  /** Whether the current user is a server admin */
+  readonly isServerAdmin = signal(false);
+
   /** Current guild ID for the invite modal */
   readonly selectedGuildId = () => this.state.guildId();
 
@@ -61,6 +69,7 @@ export class MainLayoutComponent implements OnInit {
       if (profile?.customThemeCss) {
         this.themeService.applyCustomTheme(profile.customThemeCss, 'current-user');
       }
+      this.isServerAdmin.set(profile?.isServerAdmin ?? false);
     });
   }
 
@@ -78,5 +87,13 @@ export class MainLayoutComponent implements OnInit {
 
   closeInviteModal(): void {
     this.showInviteModal.set(false);
+  }
+
+  openAdminModal(): void {
+    this.showAdminModal.set(true);
+  }
+
+  closeAdminModal(): void {
+    this.showAdminModal.set(false);
   }
 }

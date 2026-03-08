@@ -11,6 +11,8 @@ A centralized, cross-platform real-time chat application (Discord-like) with tex
 
 ## Getting Started
 
+**For a complete step-by-step setup guide, see [GETTING_STARTED.md](GETTING_STARTED.md).** It covers Docker deployment, local development, and troubleshooting.
+
 ### Prerequisites
 
 - .NET 8 SDK
@@ -29,9 +31,13 @@ A centralized, cross-platform real-time chat application (Discord-like) with tex
 3. Run migrations: `dotnet ef database update` (from ChatApp.Api)
 4. Run the API: `dotnet run --project ChatApp.Api`
 
+### First-Time Setup
+
+On first deployment, the client redirects to `/setup` where you create the admin account. After that, new users register via `/register` and must be approved by an admin before logging in. Admins use the shield icon in the channel list to open the Pending Registrations modal.
+
 ### REST API (JWT required)
 
-- `GET /api/users/me` – current user profile (id, username, customThemeCss)
+- `GET /api/users/me` – current user profile (id, username, customThemeCss, isServerAdmin)
 - `PUT /api/users/me/theme` – update custom theme CSS
 - `GET /api/guilds` – user's joined guilds
 - `POST /api/guilds` – create a guild (body: `{ name }`)
@@ -47,7 +53,8 @@ A centralized, cross-platform real-time chat application (Discord-like) with tex
 ### SignalR Hub
 
 - **Endpoint**: `ws://localhost:5000/hubs/chat` (or your API base URL)
-- **Auth**: JWT via `Authorization: Bearer {token}` or query `?access_token={token}`
+- **Auth**: JWT via `Authorization: Bearer {token}` or query `?access_token={token}`. The client uses `accessTokenFactory` to pass the stored JWT from AuthService. The backend extracts the token from the query string for `/hubs/chat` WebSocket connections via `JwtBearerEvents.OnMessageReceived`.
+- **CORS**: Backend allows credentials and origins `http://localhost:1420` and `tauri://localhost` for WebSocket auth.
 - **Methods**:
   - `JoinGroup(guildId)` – join a guild group
   - `LeaveGroup(guildId)` – leave
@@ -79,9 +86,9 @@ A centralized, cross-platform real-time chat application (Discord-like) with tex
 
 **Production build**: Before `npm run tauri:build`, set `apiUrl` in `src/environments/environment.prod.ts` to your production .NET backend URL (e.g. `https://api.yourserver.com`). The build produces an optimized Angular bundle and a Windows installer (`.msi` and `.exe`) in `client/src-tauri/target/release/bundle/`. Voice gRPC (port 50051) is configured on the backend; the client connects only to the API for REST and SignalR.
 
-**Structure**: Login screen → Main layout (Server sidebar | Channel list | Chat area). `ServerSidebarComponent` fetches guilds via REST; `ChannelListComponent` shows channels per guild, including Create Invite (server menu); `ChatAreaComponent` loads message history via REST and receives real-time messages via SignalR. `AuthService` stores JWT; `ApiService` calls REST endpoints; `ChatHubService` connects to SignalR. `VoiceRoomService` uses mediasoup-client for voice channels. When in a voice channel: **VoiceChannelPanel** shows a grid of participant avatars in the channel sidebar; muted users display a red mute icon overlay; the active speaker (from local mic level analysis) has a glowing accent border. **Voice controls bar** (Mute / Deafen) appears at the bottom of the main layout; Mute pauses the mediasoup Producer and broadcasts via SignalR so other clients show the muted icon; Deafen follows Discord behavior (also mutes). **Attachments**: '+' button next to chat input opens file picker; uploads go to `POST /api/media/upload`; returned URL is sent with `SendMessage`; images render inline, other files as download links. **Invite system**: Create Invite modal generates shortlinks (`nexchat://invite/CODE`); Tauri deep-link handler catches these, calls Join Server API, and redirects into the guild.
+**Structure**: First visit → Setup (create admin) or Login/Register → Main layout (Server sidebar | Channel list | Chat area). `ServerSidebarComponent` fetches guilds via REST; `ChannelListComponent` shows channels per guild, including Create Invite (server menu); `ChatAreaComponent` loads message history via REST and receives real-time messages via SignalR. `AuthService` stores JWT; `ApiService` calls REST endpoints; `ChatHubService` connects to SignalR. `VoiceRoomService` uses mediasoup-client for voice channels. When in a voice channel: **VoiceChannelPanel** shows a grid of participant avatars in the channel sidebar; muted users display a red mute icon overlay; the active speaker (from local mic level analysis) has a glowing accent border. **Voice controls bar** (Mute / Deafen) appears at the bottom of the main layout; Mute pauses the mediasoup Producer and broadcasts via SignalR so other clients show the muted icon; Deafen follows Discord behavior (also mutes). **Attachments**: '+' button next to chat input opens file picker; uploads go to `POST /api/media/upload`; returned URL is sent with `SendMessage`; images render inline, other files as download links. **Invite system**: Create Invite modal generates shortlinks (`nexchat://invite/CODE`); Tauri deep-link handler catches these, calls Join Server API, and redirects into the guild.
 
-**Plugins**: Client-side plugins load from `~/.freecord/plugins` (`.js` files). Copy `client/plugins/example.js` to that directory for a sample. Plugins receive `window.NexChatAPI` with `onMessageRendered(callback)` to transform message text before display. Requires Tauri desktop (not browser). Tauri filesystem permissions are strictly scoped to only this directory.
+**Plugins**: Client-side plugins load from `~/.freecord/plugins` (`.js` files). Create the directory manually if it does not exist; copy `client/plugins/example.js` into it. Plugins receive `window.NexChatAPI` with `onMessageRendered(callback)` to transform message text before display. Requires Tauri desktop (not browser). Tauri fs allowlist grants readDir and readFile only, scoped to `$HOME/.freecord/plugins/*`.
 
 ### Docker Deployment (Recommended)
 
@@ -99,6 +106,7 @@ dotnet ef database update --project backend/ChatApp.Api
 
 - **API**: `http://localhost:5000` (SignalR hub: `ws://localhost:5000/hubs/chat`)
 - **Voice gRPC**: `localhost:50051` (internal; API connects via `voice-service:50051`)
+- **WebRTC ports**: 40000–40100 (UDP/TCP) exposed for ICE; ANNOUNCED_IP is auto-resolved from `host.docker.internal` so clients receive the correct host IP in ICE candidates. For LAN clients (e.g. mobile), set `ANNOUNCED_IP=192.168.1.x` in `.env` before `docker compose up`.
 
 ### Voice Service Setup (Local)
 
@@ -107,6 +115,7 @@ dotnet ef database update --project backend/ChatApp.Api
 3. Run: `npm start` (or `npm run dev` for ts-node)
 4. gRPC endpoint: `localhost:50051`
 5. RPCs: `GetRouterRtpCapabilities`, `CreateWebRtcTransport`, `ConnectTransport`, `Produce` – full mediasoup WebRTC flow
+6. **ANNOUNCED_IP** (optional): IP advertised in ICE candidates. Default `127.0.0.1` for local dev. In Docker, set to your host's LAN IP if clients connect from other machines (e.g. `ANNOUNCED_IP=192.168.1.5`).
 
 ### Presence (Redis)
 

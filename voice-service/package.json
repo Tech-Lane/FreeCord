@@ -11,7 +11,7 @@
   "keywords": ["mediasoup", "webrtc", "grpc", "voice"],
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.12.2",

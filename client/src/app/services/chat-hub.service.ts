@@ -1,6 +1,7 @@
 import { Injectable, signal, inject, DestroyRef } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 /** ICE parameters for mediasoup createSendTransport */
 export interface IceParameters {
@@ -108,12 +109,14 @@ const HUB_URL = `${environment.apiUrl}${environment.hubPath}`;
  * message events. Updates the UI when ReceiveMessage (MessageReceived) events
  * arrive from the server.
  *
- * Usage: Inject in components; call connect(accessToken) after auth, then
- * joinGroup(guildId) when entering a guild. Messages are exposed via messages() signal.
+ * Usage: Inject in components; call connect() after auth, then joinGroup(guildId) when
+ * entering a guild. JWT is read from AuthService (localStorage) via accessTokenFactory.
+ * Messages are exposed via messages() signal.
  */
 @Injectable({ providedIn: 'root' })
 export class ChatHubService {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   /** Current SignalR connection. null when disconnected. */
   private connection: HubConnection | null = null;
@@ -135,15 +138,17 @@ export class ChatHubService {
   }
 
   /**
-   * Connects to the ChatHub with optional JWT. Call after user logs in.
-   * @param accessToken - JWT for Authorization. Pass via query param for WebSocket.
+   * Connects to the ChatHub using the stored JWT from AuthService.
+   * accessTokenFactory supplies the token as the access_token query param for WebSocket auth.
+   * Call after user logs in. Reconnects automatically use the latest stored token.
+   * @param _accessToken - Deprecated; token is always read from AuthService storage.
    */
-  async connect(accessToken?: string): Promise<void> {
+  async connect(_accessToken?: string): Promise<void> {
     if (this.connection?.state === 'Connected') return;
 
     const builder = new HubConnectionBuilder()
       .withUrl(HUB_URL, {
-        accessTokenFactory: accessToken ? () => accessToken : undefined
+        accessTokenFactory: () => this.auth.getToken()
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information);

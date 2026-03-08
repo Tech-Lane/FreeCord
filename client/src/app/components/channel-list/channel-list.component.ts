@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { GuildChannelStateService } from '../../services/guild-channel-state.service';
@@ -29,6 +29,12 @@ export class ChannelListComponent {
 
   /** Emitted when user clicks Create Invite */
   readonly openCreateInvite = output<void>();
+
+  /** Emitted when server admin clicks the admin button */
+  readonly openAdmin = output<void>();
+
+  /** Whether the current user is a server admin (can approve/deny registrations) */
+  readonly isServerAdmin = input<boolean>(false);
 
   /** Whether the guild dropdown menu is open */
   readonly menuOpen = signal(false);

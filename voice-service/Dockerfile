@@ -1,12 +1,13 @@
 # FreeCord Voice Service - Node.js Mediasoup with gRPC and WebRTC
-# Uses Node 20 LTS; Mediasoup requires build tools for native addons
-FROM node:20-bookworm-slim AS build
+# Uses Node 22 (mediasoup 3.19+ requires Node >=22); Mediasoup needs build tools for native worker
+FROM node:22-bookworm-slim AS build
 
 WORKDIR /app
 
-# Install build dependencies for Mediasoup native modules (Python, make, g++)
+# Install build deps for Mediasoup: Python + pip (for invoke), make, g++ (worker build from source when no prebuilt)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
+    python3-pip \
     make \
     g++ \
     && rm -rf /var/lib/apt/lists/*
@@ -26,7 +27,7 @@ COPY proto/ ./proto/
 RUN npm run build
 
 # Production stage - minimal runtime image
-FROM node:20-bookworm-slim AS runtime
+FROM node:22-bookworm-slim AS runtime
 
 WORKDIR /app
 
@@ -39,15 +40,18 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./
 COPY --from=build /app/proto ./proto
 
+# Entrypoint resolves host IP for ANNOUNCED_IP when running in Docker
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 RUN chown -R appuser:appuser /app
 USER appuser
 
 # gRPC server port (TCP)
 EXPOSE 50051
 
-# WebRTC RTC port range (UDP and TCP) - Mediasoup uses 10000-59999
-# Clients connect to the voice service for WebRTC; ports must be exposed to host
-EXPOSE 10000-59999/udp 10000-59999/tcp
+# WebRTC RTC port range (UDP and TCP) - aligned with RTC_MIN_PORT/RTC_MAX_PORT env (default 40000-40100)
+EXPOSE 40000-40100/udp 40000-40100/tcp
 
-# Mediasoup worker listens on 0.0.0.0; gRPC binds to 0.0.0.0:50051
-CMD ["node", "dist/index.js"]
+# Entrypoint sets ANNOUNCED_IP from host.docker.internal when unset; then starts Node
+ENTRYPOINT ["/app/entrypoint.sh"]

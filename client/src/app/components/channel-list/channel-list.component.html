@@ -38,6 +38,17 @@
           }
         </div>
       }
+      @if (isServerAdmin()) {
+        <button
+          type="button"
+          class="settings-btn"
+          (click)="openAdmin.emit()"
+          title="Server admin - pending registrations"
+          aria-label="Open server admin"
+        >
+          &#128737;
+        </button>
+      }
       <button
         type="button"
         class="settings-btn"

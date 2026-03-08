@@ -78,6 +78,8 @@ export class ChatAreaComponent implements OnInit, OnDestroy {
 
   /**
    * Loads channel when route params change. Fetches history via REST and wires SignalR.
+   * Ensures SignalR connection and guild group membership so MessageReceived events are received
+   * (critical when navigating directly via URL or after page refresh, when selectGuild was never called).
    */
   private onRouteParamsChanged(): void {
     if (!this.guildIdParam || !this.channelIdParam) {
@@ -102,7 +104,27 @@ export class ChatAreaComponent implements OnInit, OnDestroy {
     });
 
     this.chatHub.setCurrentChannel(this.channelIdParam);
+    // Ensure we're in the SignalR guild group so MessageReceived broadcasts are received.
+    // Required when navigating directly (URL/bookmark/refresh) since joinGroup is normally
+    // only called when clicking a guild in the sidebar.
+    this.ensureConnectionAndJoinGroup(this.guildIdParam);
     this.loadMessageHistory();
+  }
+
+  /**
+   * Connects to SignalR and joins the guild group if not already done.
+   * Must be called when viewing a channel so MessageReceived events are received.
+   */
+  private async ensureConnectionAndJoinGroup(guildId: string): Promise<void> {
+    if (!guildId) return;
+    try {
+      if (!this.chatHub.isConnected()) {
+        await this.chatHub.connect(this.auth.getToken());
+      }
+      await this.chatHub.joinGroup(guildId);
+    } catch {
+      // Connection/join failure; user may retry by sending or navigating
+    }
   }
 
   /**
@@ -199,6 +221,7 @@ export class ChatAreaComponent implements OnInit, OnDestroy {
   /**
    * Sends the draft message via SignalR SendMessage and clears the input.
    * Includes pending attachment URL if one was uploaded.
+   * Ensures we're connected and in the guild group before sending so we receive the MessageReceived broadcast.
    */
   async sendMessage(): Promise<void> {
     const content = this.messageDraft?.trim() ?? '';
@@ -210,9 +233,8 @@ export class ChatAreaComponent implements OnInit, OnDestroy {
     const cid = this.channelId();
     if (!gid || !cid) return;
 
-    if (!this.chatHub.isConnected()) {
-      await this.chatHub.connect(this.auth.getToken());
-    }
+    // Ensure we're in the guild's SignalR group so we receive our own MessageReceived broadcast
+    await this.ensureConnectionAndJoinGroup(gid);
 
     this.messageDraft = '';
     this.pendingAttachmentUrl = null;

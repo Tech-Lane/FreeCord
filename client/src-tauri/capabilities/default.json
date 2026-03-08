@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default permissions with strictly scoped plugin directory access",
+  "description": "Default permissions with strictly scoped plugin directory access (read-only: readDir, readFile)",
   "windows": [
     "main"
   ],
@@ -13,28 +13,21 @@
       "identifier": "fs:allow-read-dir",
       "allow": [
         { "path": "$HOME/.freecord/plugins" },
-        { "path": "$HOME/.freecord/plugins/**/*" }
+        { "path": "$HOME/.freecord/plugins/*" }
       ]
     },
     {
       "identifier": "fs:allow-read-text-file",
       "allow": [
         { "path": "$HOME/.freecord/plugins" },
-        { "path": "$HOME/.freecord/plugins/**/*" }
+        { "path": "$HOME/.freecord/plugins/*" }
       ]
     },
     {
-      "identifier": "fs:allow-exists",
+      "identifier": "fs:allow-read-file",
       "allow": [
         { "path": "$HOME/.freecord/plugins" },
-        { "path": "$HOME/.freecord/plugins/**/*" }
-      ]
-    },
-    {
-      "identifier": "fs:allow-mkdir",
-      "allow": [
-        { "path": "$HOME/.freecord/plugins" },
-        { "path": "$HOME/.freecord/plugins/**/*" }
+        { "path": "$HOME/.freecord/plugins/*" }
       ]
     }
   ]

@@ -51,10 +51,18 @@ export class GuildChannelStateService {
   readonly guildListRefreshTrigger = signal(0);
 
   setGuild(guild: SelectedGuild | null): void {
+    const current = this.selectedGuild();
+    // Only clear channels when switching to a different guild (or null)
+    const isSameGuild = guild !== null && current !== null && current.id === guild.id;
+
     this.selectedGuild.set(guild);
-    this.channels.set([]);
-    this.selectedChannel.set(null);
-    this.guildPermissions.set(0); // Reset until permissions are fetched
+    if (!isSameGuild) {
+      this.channels.set([]);
+      this.selectedChannel.set(null);
+    }
+    if (guild === null) {
+      this.guildPermissions.set(0);
+    }
   }
 
   /** Updates the permission bitfield for the current guild. */

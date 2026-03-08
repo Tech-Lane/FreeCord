@@ -29,6 +29,12 @@ public static class AuthEndpoints
             return Results.BadRequest(new { error = "Username, email, and password are required." });
         }
 
+        // Server must be initialized (first admin created) before open registration
+        if (!await db.Users.AnyAsync())
+        {
+            return Results.BadRequest(new { error = "Server is not yet initialized. Please complete first-time setup." });
+        }
+
         if (await db.Users.AnyAsync(u => u.Username == request.Username))
         {
             return Results.Conflict(new { error = "Username already exists." });
@@ -47,14 +53,20 @@ public static class AuthEndpoints
             Username = request.Username.Trim(),
             Email = request.Email.Trim().ToLowerInvariant(),
             PasswordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsServerAdmin = false,
+            IsApproved = false
         };
 
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        var token = GenerateJwtToken(user, config);
-        return Results.Created("/api/auth/login", new { token, userId = user.Id, username = user.Username });
+        // New registrations require admin approval; do not issue token
+        return Results.Created("/api/auth/login", new
+        {
+            message = "Registration successful. Your account is pending admin approval.",
+            pendingApproval = true
+        });
     }
 
     private static async Task<IResult> Login(
@@ -78,6 +90,11 @@ public static class AuthEndpoints
             return Results.Unauthorized();
         }
 
+        if (!user.IsApproved)
+        {
+            return Results.Json(new { error = "Your account is pending admin approval." }, statusCode: 403);
+        }
+
         user.LastSeenAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
 
@@ -85,18 +102,25 @@ public static class AuthEndpoints
         return Results.Ok(new { token, userId = user.Id, username = user.Username });
     }
 
-    private static string GenerateJwtToken(User user, IConfiguration config)
+    /// <summary>
+    /// Generates a JWT for the given user. Exposed for SetupEndpoints to use when creating the first admin.
+    /// </summary>
+    public static string GenerateJwtToken(User user, IConfiguration config)
     {
         var key = config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is required");
         var keyBytes = Encoding.UTF8.GetBytes(key);
         var expirationMinutes = int.TryParse(config["Jwt:ExpirationMinutes"], out var mins) ? mins : 60;
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Email, user.Email)
         };
+        if (user.IsServerAdmin)
+        {
+            claims.Add(new Claim("IsServerAdmin", "true"));
+        }
 
         var creds = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(

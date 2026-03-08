@@ -1,5 +1,8 @@
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // FS access is enforced by Tauri capability system. The frontend can only access paths
+    // allowed in capabilities/default.json (e.g. $HOME/.freecord/plugins/*). No Rust
+    // code bypasses this; all fs operations go through the plugin IPC.
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_deep_link::init())

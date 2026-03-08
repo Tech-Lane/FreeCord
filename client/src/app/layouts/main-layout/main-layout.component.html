@@ -7,8 +7,10 @@
   <!-- Channel list sidebar (includes header with theme settings and create invite) -->
   <aside class="channel-sidebar">
     <app-channel-list
+      [isServerAdmin]="isServerAdmin()"
       (openThemeSettings)="openThemeModal()"
       (openCreateInvite)="openInviteModal()"
+      (openAdmin)="openAdminModal()"
     />
     @if (voiceRoom.isInVoiceChannel()) {
       <app-voice-channel-panel [channelName]="currentVoiceChannelName()" />
@@ -63,5 +65,10 @@
       [guildId]="selectedGuildId()!"
       (close)="closeInviteModal()"
     />
+  }
+
+  <!-- Server Admin modal (pending registrations) -->
+  @if (showAdminModal()) {
+    <app-admin-modal (close)="closeAdminModal()" />
   }
 </div>

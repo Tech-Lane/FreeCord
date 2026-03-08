@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BaseDirectory, exists, readDir, readTextFile, mkdir } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, readDir, readTextFile } from '@tauri-apps/plugin-fs';
 import { PluginEventBusService } from './plugin-event-bus.service';
 import { createNexChatAPI } from './nexchat-api';
 
@@ -45,7 +45,6 @@ export class PluginLoaderService {
 
     try {
       this.setupNexChatAPI();
-      await this.ensurePluginsDirectory();
       await this.loadPlugins();
     } catch (err) {
       console.error('[PluginLoader] Failed to initialize:', err);
@@ -75,17 +74,9 @@ export class PluginLoaderService {
   }
 
   /**
-   * Ensures the plugins directory exists. Creates it if missing.
-   */
-  private async ensurePluginsDirectory(): Promise<void> {
-    const dirExists = await exists(PLUGINS_DIR, { baseDir: BaseDirectory.Home });
-    if (!dirExists) {
-      await mkdir(PLUGINS_DIR, { baseDir: BaseDirectory.Home, recursive: true });
-    }
-  }
-
-  /**
    * Discovers and loads all .js files from the plugins directory.
+   * Directory must exist at ~/.freecord/plugins; if it does not exist, no plugins are loaded.
+   * Tauri fs permissions are scoped to read-only (readDir, readFile) for $HOME/.freecord/plugins/*.
    */
   private async loadPlugins(): Promise<void> {
     let entries: { name: string; isFile: boolean }[];

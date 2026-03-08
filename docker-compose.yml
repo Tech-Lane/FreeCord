@@ -67,11 +67,19 @@ services:
       dockerfile: Dockerfile
     container_name: freecord-voice
     restart: unless-stopped
+    # Host-gateway allows entrypoint to resolve host IP for ANNOUNCED_IP (ICE candidates)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # RTC port range must match exposed ports; override ANNOUNCED_IP for LAN clients
+      RTC_MIN_PORT: 40000
+      RTC_MAX_PORT: 40100
+      ANNOUNCED_IP: ${ANNOUNCED_IP:-}
     ports:
       - "50051:50051"
-      # WebRTC RTC ports (Mediasoup uses 10000-59999; subset exposed; expand if more concurrent channels needed)
-      - "10000-10100:10000-10100/udp"
-      - "10000-10100:10000-10100/tcp"
+      # WebRTC RTC ports: 40000-40100 (UDP/TCP) for ICE; expand if more concurrent channels needed
+      - "40000-40100:40000-40100/udp"
+      - "40000-40100:40000-40100/tcp"
     networks:
       - freecord-network
 

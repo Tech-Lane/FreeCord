@@ -15,6 +15,17 @@ public class User
     /// </summary>
     public string? CustomThemeCss { get; set; }
 
+    /// <summary>
+    /// Whether this user is a server administrator. Admins can approve/deny new registrations.
+    /// </summary>
+    public bool IsServerAdmin { get; set; }
+
+    /// <summary>
+    /// Whether the user has been approved by an admin. Pending users cannot log in.
+    /// First admin (setup) is auto-approved; subsequent registrations require approval.
+    /// </summary>
+    public bool IsApproved { get; set; }
+
     public ICollection<GuildMember> GuildMemberships { get; set; } = new List<GuildMember>();
     public ICollection<Message> Messages { get; set; } = new List<Message>();
 }

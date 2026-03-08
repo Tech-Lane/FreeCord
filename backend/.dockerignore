@@ -1,6 +1,6 @@
-# Build outputs
-bin/
-obj/
+# Build outputs (explicit at any depth - prevents host NuGet paths from polluting Linux build)
+**/bin/
+**/obj/
 *.user
 *.suo
 .vs/

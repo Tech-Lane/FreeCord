@@ -2,6 +2,8 @@
 
 A centralized, cross-platform real-time chat application built with Clean Architecture.
 
+> **Setup**: For installation and run instructions, see [GETTING_STARTED.md](GETTING_STARTED.md).
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -26,9 +28,13 @@ backend/
 ### ChatApp.Api
 
 - Minimal API with JWT authentication
+- **First-time setup**: `GET /api/setup/status` (returns `isInitialized`); `POST /api/setup/initialize` (creates first admin; only when no users exist)
 - Auth endpoints: `/api/auth/register`, `/api/auth/login`
+  - Register: requires server initialized; new users get `IsApproved=false` and require admin approval before login
+  - Login: returns 403 if user is not approved
+- **Admin endpoints** (require JWT + `IsServerAdmin`): `GET /api/admin/pending-users`, `POST /api/admin/approve-user/{userId}`, `POST /api/admin/deny-user/{userId}`
 - User endpoints (require JWT):
-  - `GET /api/users/me` – current user profile (id, username, customThemeCss)
+  - `GET /api/users/me` – current user profile (id, username, customThemeCss, isServerAdmin)
   - `PUT /api/users/me/theme` – update CustomThemeCss (max 64KB)
 - Guild REST endpoints (require JWT):
   - `GET /api/guilds` – user's joined guilds
@@ -45,11 +51,14 @@ backend/
   - `POST /api/media/upload` – upload file (multipart/form-data); returns `{ url, isImage, originalFileName }`; files stored in `/uploads`, max 10 MB; whitelisted extensions (images, PDF, documents, archives)
 - **Role & Permissions**: `RequirePermissionFilter` enforces guild permission checks. Guild owners have all permissions; members get OR of assigned role bitfields. Permissions include CreateInstantInvite for invite creation.
 - SignalR hub: `/hubs/chat`
-- JWT supports both `Authorization` header and `access_token` query param (for WebSocket)
+- JWT supports both `Authorization` header and `access_token` query param (for WebSocket). `JwtBearerEvents.OnMessageReceived` extracts the token from the query string when the request path starts with `/hubs/chat`.
+- CORS: default policy allows `http://localhost:1420`, `tauri://localhost` with `AllowCredentials()` for WebSocket auth.
 
 ### ChatApp.Core
 
 - **Entities**: User, Guild, Channel, Message, GuildMember, ChannelType, Role, Invite
+  - `User.IsServerAdmin` – server administrator (can approve/deny registrations)
+  - `User.IsApproved` – whether user can log in (pending admin approval)
   - `Message.AttachmentUrl` – optional relative URL to uploaded file (e.g. /uploads/xyz.png); images render inline, others as download links
   - `Invite` – Code, GuildId, CreatorId, ExpirationDate, MaxUses, Uses; short URL-safe codes for deep links
   - `User.CustomThemeCss` – optional custom CSS for profile theming (sanitized client-side)
@@ -104,7 +113,7 @@ backend/
 
 Node.js TypeScript service in `/voice-service`:
 
-- **Mediasoup C++ Worker**: Initialized with standard WebRTC config (listen IP `0.0.0.0`, RTC ports 10000–59999)
+- **Mediasoup C++ Worker**: Initialized with WebRTC config (listen IP `0.0.0.0`, RTC ports from `RTC_MIN_PORT`/`RTC_MAX_PORT` env, default 40000–40100). `ANNOUNCED_IP` is advertised in ICE candidates so clients can route audio; fallback `127.0.0.1`. In Docker, the entrypoint resolves `host.docker.internal` to inject the host IP when `ANNOUNCED_IP` is unset.
 - **gRPC Server**: Listens on port 50051
 - **Proto**: `proto/voice.proto` defines `VoiceService` with:
   - `GetRouterRtpCapabilities` – returns router RTP capabilities JSON
@@ -158,7 +167,7 @@ client/
 ### MVP Components
 
 - **ServerSidebarComponent** – Fetches and lists user's joined guilds from REST; selecting a guild loads channels and joins SignalR guild group
-- **ChannelListComponent** – Displays text and voice channels for the selected guild; text channels link to chat, voice channels use VoiceRoomService; gear icon opens Theme Settings modal
+- **ChannelListComponent** – Displays text and voice channels for the selected guild; text channels link to chat, voice channels use VoiceRoomService; gear icon opens Theme Settings modal; shield icon (for server admins) opens Pending Registrations modal
 - **VoiceChannelPanelComponent** – Shown in channel sidebar when in a voice channel; grid of participant avatars (initials + colored background), mute icon overlay for muted users, glowing CSS border for active speaker; data from ChatHubService.voiceParticipants (updated by VoiceParticipant* events)
 - **ThemeSettingsModalComponent** – Modal for theme customization: color pickers for core CSS variables, text area for custom CSS, live preview; saves via PUT /api/users/me/theme
 - **CreateInviteModalComponent** – Creates invite via POST /api/guilds/{guildId}/invites; copies shortlink (nexchat://invite/code) to clipboard
@@ -166,8 +175,9 @@ client/
 
 ### Routing
 
+- `/setup` – First-time setup (create admin account); shown only when server has no users
 - `/login` – Login screen
-- `/register` – Registration
+- `/register` – Registration (new users require admin approval)
 - `/invite/:code` – Invite redirect; unauthenticated users are sent to login; authenticated users join the guild and are redirected
 - `/app` – Main layout (Server sidebar | Channel list | Chat), protected by authGuard
 - `/app/guild/:guildId/channel/:channelId` – Chat view for a channel
@@ -194,9 +204,9 @@ client/
 
 ### SignalR Integration (ChatHubService)
 
-- Connects to `/hubs/chat` with JWT (`accessTokenFactory`)
+- Connects to `/hubs/chat`; `accessTokenFactory` supplies the stored JWT from AuthService (localStorage) as the `access_token` query param for WebSocket authentication. Reconnects use the latest stored token.
 - Handles `MessageReceived` events; appends to `messages()` signal when payload matches `setCurrentChannel(channelId)`
-- Methods: `connect(accessToken)`, `joinGroup(guildId)`, `leaveGroup(guildId)`, `sendMessage(guildId, channelId, content, attachmentUrl?)`, `setCurrentChannel(channelId)`, `setMessages(msgs)`, `getChannelHistory(...)`, `getRouterRtpCapabilities()`, `joinVoiceChannel(guildId, channelId)`, `connectTransport(...)`, `createProducer(...)`, `setVoiceChannel(guildId, channelId)`, `leaveVoiceChannel(guildId, channelId)`, `setVoiceMute(...)`, `setVoiceDeafen(...)`, `setVoiceSpeaking(...)`
+- Methods: `connect()`, `joinGroup(guildId)`, `leaveGroup(guildId)`, `sendMessage(guildId, channelId, content, attachmentUrl?)`, `setCurrentChannel(channelId)`, `setMessages(msgs)`, `getChannelHistory(...)`, `getRouterRtpCapabilities()`, `joinVoiceChannel(guildId, channelId)`, `connectTransport(...)`, `createProducer(...)`, `setVoiceChannel(guildId, channelId)`, `leaveVoiceChannel(guildId, channelId)`, `setVoiceMute(...)`, `setVoiceDeafen(...)`, `setVoiceSpeaking(...)`
 - **VoiceRoomService**: Mediasoup-client integration for voice channels. `joinVoiceChannel(guildId, channelId)` orchestrates: get router RTP caps → Device.load → getUserMedia → create transport → handle connect/produce → stream audio to Node.js. Notifies ChatHub via `setVoiceChannel`, `leaveVoiceChannel`, `setVoiceMute`, `setVoiceDeafen`, `setVoiceSpeaking`. Uses Web Audio API (AnalyserNode) on local mic to detect speaking; calls `setVoiceSpeaking` when level exceeds threshold. `toggleMute()` pauses/resumes mediasoup Producer and broadcasts via hub. `toggleDeafen()` updates hub and auto-mutes when deafening.
 
 ### State (GuildChannelStateService)
@@ -210,7 +220,7 @@ client/
 - **PluginEventBusService** – RxJS-based event bus. Emits `MessageRenderedPayload` when messages are about to be displayed. Plugins register content transformers via `NexChatAPI.onMessageRendered(callback)` to intercept or format message text before display.
 - **window.NexChatAPI** – Frozen, minimal API exposed to plugins: `onMessageRendered(callback)`, `version`. Transformers receive `(content, context)` and return transformed content (sync or Promise).
 - **FormatMessageContentPipe** – Angular pipe used by ChatAreaComponent; runs plugin transformers and displays the result (use with `async` pipe).
-- **Tauri capabilities** – Strictly scoped: `fs:allow-read-dir`, `fs:allow-read-text-file`, `fs:allow-exists`, `fs:allow-mkdir` limited to `$HOME/.freecord/plugins/**/*` (no broad `fs:default`).
+- **Tauri capabilities** – Strictly scoped read-only: `fs:allow-read-dir`, `fs:allow-read-text-file`, `fs:allow-read-file` limited to `$HOME/.freecord/plugins` and `$HOME/.freecord/plugins/*` (no write, no broad `fs:default`). Configured in `tauri.conf.json` (tauri.fs.allowlist) and enforced via `capabilities/default.json`. Rust main.rs/lib.rs do not bypass; all fs access goes through the plugin IPC.
 - **Deep linking** – Tauri `@tauri-apps/plugin-deep-link` registers `nexchat://` scheme. `InviteDeepLinkService` listens for `nexchat://invite/CODE`; calls `joinGuildViaInvite` and redirects to the guild. If user is not logged in, stores invite in sessionStorage and redirects to login; after login, `processPendingInvite` runs.
 
 ## Configuration
@@ -247,7 +257,7 @@ The root `docker-compose.yml` defines:
 | **postgres** | `postgres:16-alpine` | 5432 | PostgreSQL 16 database |
 | **redis** | `redis:7-alpine` | 6379 | Presence and caching |
 | **api** | `backend/Dockerfile` (multi-stage, ChatApp.Api) | 5000 | .NET 8 HTTP API, SignalR |
-| **voice-service** | `voice-service/Dockerfile` | 50051 (gRPC), 10000–10100 (UDP/TCP) | Node.js Mediasoup, WebRTC |
+| **voice-service** | `voice-service/Dockerfile` | 50051 (gRPC), 40000–40100 (UDP/TCP) | Node.js Mediasoup, WebRTC |
 
 All services share the `freecord-network` bridge network and resolve each other via Docker internal DNS (`postgres`, `redis`, `voice-service`, `api`). The API uses environment variables to connect to these services.
 

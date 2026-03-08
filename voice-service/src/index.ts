@@ -5,6 +5,10 @@
  * - Initializes a Mediasoup C++ worker with standard WebRTC configurations
  * - Exposes a gRPC server with CreateWebRtcTransport endpoint
  * - Returns transport parameters (id, iceParameters, iceCandidates, dtlsParameters)
+ *
+ * WebRTC/ICE: ANNOUNCED_IP is advertised to clients in ICE candidates so they can
+ * route audio correctly. When running in Docker, this should be the host's reachable
+ * IP (e.g., from host.docker.internal resolution or explicit env). Fallback: 127.0.0.1.
  */
 
 import * as path from "path";
@@ -12,11 +16,13 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import * as mediasoup from "mediasoup";
 
-// Configuration
+// Configuration - RTC ports configurable for Docker port mapping alignment
 const GRPC_PORT = 50051;
-const RTC_MIN_PORT = 10000;
-const RTC_MAX_PORT = 59999;
+const RTC_MIN_PORT = parseInt(process.env.RTC_MIN_PORT ?? "40000", 10);
+const RTC_MAX_PORT = parseInt(process.env.RTC_MAX_PORT ?? "40100", 10);
 const LISTEN_IP = "0.0.0.0";
+/** IP advertised in ICE candidates; clients connect to this. Fallback for local dev. */
+const ANNOUNCED_IP = process.env.ANNOUNCED_IP ?? "127.0.0.1";
 
 // Mediasoup state
 let worker: mediasoup.types.Worker | null = null;
@@ -43,21 +49,26 @@ async function initMediasoupWorker(): Promise<void> {
 
   console.log(`[mediasoup] Worker created (PID: ${worker.pid})`);
 
-  // Create WebRtcServer with listen IPs and port range
+  // Create WebRtcServer with listen IPs and port range.
+  // announcedAddress: IP advertised in ICE candidates so clients can route audio.
+  // Required when listening on 0.0.0.0; uses ANNOUNCED_IP env (fallback 127.0.0.1).
   webRtcServer = await worker.createWebRtcServer({
     listenInfos: [
       {
         protocol: "udp",
         ip: LISTEN_IP,
         portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT },
+        announcedAddress: ANNOUNCED_IP,
       },
       {
         protocol: "tcp",
         ip: LISTEN_IP,
         portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT },
+        announcedAddress: ANNOUNCED_IP,
       },
     ],
   });
+  console.log(`[mediasoup] WebRtcServer created (RTC ${RTC_MIN_PORT}-${RTC_MAX_PORT}, announced: ${ANNOUNCED_IP})`);
 
   // Create router with default media codecs for voice
   const mediaCodecs: mediasoup.types.RouterRtpCodecCapability[] = [

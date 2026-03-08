@@ -13,10 +13,8 @@
         "packagesPath": "C:\\Users\\Lanew\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\ChatApp.Api\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
+          "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\NuGet.Config",
           "C:\\Users\\Lanew\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -25,7 +23,6 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
@@ -119,10 +116,8 @@
         "packagesPath": "C:\\Users\\Lanew\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\ChatApp.Core\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
+          "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\NuGet.Config",
           "C:\\Users\\Lanew\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -131,7 +126,6 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
@@ -185,10 +179,8 @@
         "packagesPath": "C:\\Users\\Lanew\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\ChatApp.Data\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
+          "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\NuGet.Config",
           "C:\\Users\\Lanew\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -197,7 +189,6 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
@@ -277,10 +268,8 @@
         "packagesPath": "C:\\Users\\Lanew\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\ChatApp.Infra\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
+          "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\NuGet.Config",
           "C:\\Users\\Lanew\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -289,7 +278,6 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
@@ -375,10 +363,8 @@
         "packagesPath": "C:\\Users\\Lanew\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\ChatApp.Realtime\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
+          "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\NuGet.Config",
           "C:\\Users\\Lanew\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -387,7 +373,6 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },

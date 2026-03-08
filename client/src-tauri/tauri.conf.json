@@ -3,19 +3,6 @@
   "productName": "FreeCord",
   "version": "0.1.0",
   "identifier": "com.freecord",
-  "plugins": {
-    "deep-link": {
-      "desktop": {
-        "schemes": ["nexchat"]
-      }
-    }
-  },
-  "build": {
-    "frontendDist": "../dist/client/browser",
-    "devUrl": "http://localhost:4200",
-    "beforeDevCommand": "npm run start",
-    "beforeBuildCommand": "npm run build"
-  },
   "app": {
     "windows": [
       {
@@ -29,8 +16,22 @@
       }
     ],
     "security": {
+      "capabilities": ["default"],
       "csp": null
     }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["nexchat"]
+      }
+    }
+  },
+  "build": {
+    "frontendDist": "../dist/client/browser",
+    "devUrl": "http://localhost:4200",
+    "beforeDevCommand": "npm run start",
+    "beforeBuildCommand": "npm run build"
   },
   "bundle": {
     "active": true,

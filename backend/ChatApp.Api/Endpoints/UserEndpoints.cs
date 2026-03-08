@@ -39,7 +39,8 @@ public static class UserEndpoints
         {
             id = entity.Id,
             username = entity.Username,
-            customThemeCss = entity.CustomThemeCss ?? string.Empty
+            customThemeCss = entity.CustomThemeCss ?? string.Empty,
+            isServerAdmin = entity.IsServerAdmin
         });
     }
 

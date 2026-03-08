@@ -1,0 +1,61 @@
+<div class="register-container">
+  <div class="register-card">
+    <h1 class="register-title">Create Account</h1>
+    <p class="register-subtitle">
+      Register for an account. An administrator will need to approve your registration before you can log in.
+    </p>
+
+    <form class="register-form" (ngSubmit)="onSubmit()">
+      @if (error) {
+        <p class="register-error">{{ error }}</p>
+      }
+      @if (successMessage) {
+        <p class="register-success">{{ successMessage }}</p>
+      }
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="Your username"
+          class="form-input"
+          autocomplete="username"
+        />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="you&#64;example.com"
+          class="form-input"
+          autocomplete="email"
+        />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          class="form-input"
+          autocomplete="new-password"
+        />
+      </div>
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        {{ isLoading ? 'Creating account...' : 'Register' }}
+      </button>
+    </form>
+
+    <p class="register-footer">
+      Already have an account?
+      <a routerLink="/login" class="link">Sign in</a>
+    </p>
+  </div>
+</div>

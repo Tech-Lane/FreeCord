@@ -1,0 +1,55 @@
+<div class="setup-container">
+  <div class="setup-card">
+    <h1 class="setup-title">Welcome to FreeCord</h1>
+    <p class="setup-subtitle">Create your admin account to get started</p>
+    <p class="setup-description">
+      This is the first time this server has been accessed. Create the administrator account below.
+      You will be able to approve or deny new user registrations.
+    </p>
+
+    <form class="setup-form" (ngSubmit)="onSubmit()">
+      @if (error) {
+        <p class="setup-error">{{ error }}</p>
+      }
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="Admin"
+          class="form-input"
+          autocomplete="username"
+        />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="admin&#64;example.com"
+          class="form-input"
+          autocomplete="email"
+        />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          class="form-input"
+          autocomplete="new-password"
+        />
+      </div>
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        {{ isLoading ? 'Creating account...' : 'Create Admin Account' }}
+      </button>
+    </form>
+  </div>
+</div>
