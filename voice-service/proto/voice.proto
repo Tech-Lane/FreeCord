@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package freecord.voice;
+
+// VoiceService provides WebRTC transport creation for voice channels.
+service VoiceService {
+  // CreateWebRtcTransport creates a new WebRTC transport on the mediasoup worker
+  // and returns the transport parameters needed for client connection.
+  rpc CreateWebRtcTransport(CreateWebRtcTransportRequest) returns (CreateWebRtcTransportResponse);
+}
+
+message CreateWebRtcTransportRequest {
+  // Optional application data to associate with the transport.
+  string app_data = 1;
+}
+
+message IceParameters {
+  string username_fragment = 1;
+  string password = 2;
+  bool ice_lite = 3;
+}
+
+message IceCandidate {
+  string foundation = 1;
+  int32 priority = 2;
+  string ip = 3;
+  int32 port = 4;
+  string type = 5;       // host, srflx, prflx, relay
+  string protocol = 6;   // udp, tcp
+  string address = 7;
+  string tcp_type = 8;
+}
+
+message DtlsFingerprint {
+  string algorithm = 1;
+  string value = 2;
+}
+
+message DtlsParameters {
+  string role = 1;       // client, server
+  repeated DtlsFingerprint fingerprints = 2;
+}
+
+message CreateWebRtcTransportResponse {
+  string id = 1;
+  IceParameters ice_parameters = 2;
+  repeated IceCandidate ice_candidates = 3;
+  DtlsParameters dtls_parameters = 4;
+}

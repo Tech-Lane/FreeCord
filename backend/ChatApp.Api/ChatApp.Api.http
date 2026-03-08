@@ -1,0 +1,22 @@
+@ChatApp.Api_HostAddress = http://localhost:5273
+
+### Register
+POST {{ChatApp.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "SecurePassword123!"
+}
+
+### Login
+POST {{ChatApp.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "SecurePassword123!"
+}
+
+###

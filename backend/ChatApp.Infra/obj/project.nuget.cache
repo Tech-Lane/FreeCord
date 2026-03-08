@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "bzY+vs/ELr8=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Lanew\\OneDrive\\Desktop\\FreeCord\\backend\\ChatApp.Infra\\ChatApp.Infra.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lanew\\.nuget\\packages\\google.protobuf\\3.28.3\\google.protobuf.3.28.3.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\grpc.core.api\\2.66.0\\grpc.core.api.2.66.0.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\grpc.net.client\\2.66.0\\grpc.net.client.2.66.0.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\grpc.net.common\\2.66.0\\grpc.net.common.2.66.0.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\grpc.tools\\2.66.0\\grpc.tools.2.66.0.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\stackexchange.redis\\2.8.58\\stackexchange.redis.2.8.58.nupkg.sha512",
+    "C:\\Users\\Lanew\\.nuget\\packages\\system.io.pipelines\\5.0.1\\system.io.pipelines.5.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

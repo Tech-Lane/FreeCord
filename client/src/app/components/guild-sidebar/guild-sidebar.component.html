@@ -1,0 +1,12 @@
+<nav class="guild-sidebar-nav">
+  <div class="guild-list">
+    @for (guild of guilds; track guild.id) {
+      <button type="button" class="guild-item" [attr.aria-label]="'Switch to ' + guild.name">
+        <span class="guild-icon">{{ guild.name.charAt(0) }}</span>
+      </button>
+    }
+  </div>
+  <button type="button" class="guild-add" aria-label="Add server">
+    <span class="guild-add-icon">+</span>
+  </button>
+</nav>

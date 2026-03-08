@@ -1,0 +1,84 @@
+# FreeCord - Docker Compose
+# Orchestrates PostgreSQL 16, Redis, .NET API, and Node.js voice service.
+# Services communicate via Docker's internal DNS (e.g. postgres, redis, voice-service).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: freecord-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chatapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - freecord-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: freecord-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - freecord-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: freecord-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      voice-service:
+        condition: service_started
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=chatapp;Username=postgres;Password=postgres"
+      ConnectionStrings__Redis: "redis:6379"
+      Voice__Address: "http://voice-service:50051"
+    ports:
+      - "5000:5000"
+    networks:
+      - freecord-network
+
+  voice-service:
+    build:
+      context: ./voice-service
+      dockerfile: Dockerfile
+    container_name: freecord-voice
+    restart: unless-stopped
+    ports:
+      - "50051:50051"
+      # WebRTC RTC ports (Mediasoup uses 10000-59999; subset exposed; expand if more concurrent channels needed)
+      - "10000-10100:10000-10100/udp"
+      - "10000-10100:10000-10100/tcp"
+    networks:
+      - freecord-network
+
+networks:
+  freecord-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+---
+
+Project Architecture Context
+You are an expert enterprise developer building a centralized, cross-platform real-time chat application.
+
+Tech Stack:
+
+Monorepo: The workspace contains three main areas: /backend, /voice-service, and /client.
+
+Backend: .NET 8 (C#) Minimal APIs, Entity Framework Core (Code-First), PostgreSQL, Redis, SignalR. We are using Clean Architecture (Api, Core, Data, Realtime, Infra).
+
+Voice Microservice: Node.js (TypeScript), Mediasoup for WebRTC, communicating with the .NET backend via gRPC.
+
+Client: Tauri wrapping an Angular frontend.
+
+Deployment: Docker Compose.
+
+Rules:
+
+Never mix logic between the Node.js voice service and the .NET text service.
+
+Always use CSS variables (Custom Properties) in the Angular client for the theming engine.
+
+Write clean, strongly typed code. Ensure EF Core migrations are created for all database changes.

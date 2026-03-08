@@ -1,0 +1,16 @@
+# Build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# Git
+.git/
+.gitignore

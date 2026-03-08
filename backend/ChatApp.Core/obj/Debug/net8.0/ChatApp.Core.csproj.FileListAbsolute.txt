@@ -1,0 +1,11 @@
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\bin\Debug\net8.0\ChatApp.Core.deps.json
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\bin\Debug\net8.0\ChatApp.Core.dll
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\bin\Debug\net8.0\ChatApp.Core.pdb
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.AssemblyInfoInputs.cache
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.AssemblyInfo.cs
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.csproj.CoreCompileInputs.cache
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.dll
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\refint\ChatApp.Core.dll
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.pdb
+c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ref\ChatApp.Core.dll

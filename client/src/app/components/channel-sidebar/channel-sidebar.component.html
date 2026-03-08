@@ -1,0 +1,34 @@
+<div class="channel-sidebar-content">
+  <header class="channel-sidebar-header">
+    <h2 class="guild-name">{{ currentGuildName }}</h2>
+  </header>
+
+  <nav class="channel-list">
+    <div class="channel-group">
+      <span class="channel-group-label">Text Channels</span>
+      @for (channel of channels; track channel.id) {
+        @if (channel.type === 'text') {
+          <a
+            [routerLink]="['/app', 'channel', channel.id]"
+            routerLinkActive="active"
+            class="channel-item"
+          >
+            <span class="channel-icon">#</span>
+            <span class="channel-name">{{ channel.name }}</span>
+          </a>
+        }
+      }
+    </div>
+    <div class="channel-group">
+      <span class="channel-group-label">Voice Channels</span>
+      @for (channel of channels; track channel.id) {
+        @if (channel.type === 'voice') {
+          <button type="button" class="channel-item channel-item-voice">
+            <span class="channel-icon">🔊</span>
+            <span class="channel-name">{{ channel.name }}</span>
+          </button>
+        }
+      }
+    </div>
+  </nav>
+</div>

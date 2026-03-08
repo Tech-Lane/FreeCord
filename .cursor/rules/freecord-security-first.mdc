@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+When make changes, always ensure you are following best security practices as this is a self-hosted, internet-facing application.

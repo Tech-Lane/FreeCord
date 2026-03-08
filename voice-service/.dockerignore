@@ -1,0 +1,19 @@
+# Dependencies (installed via npm ci)
+node_modules/
+
+# Build output (rebuilt in container)
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+npm-debug.log*
