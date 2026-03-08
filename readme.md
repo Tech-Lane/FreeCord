@@ -33,7 +33,7 @@ A centralized, cross-platform real-time chat application (Discord-like) with tex
 
 ### First-Time Setup
 
-On first deployment, the client redirects to `/setup` where you create the admin account. After that, new users register via `/register` and must be approved by an admin before logging in. Admins use the shield icon in the channel list to open the Pending Registrations modal.
+On first deployment, the client redirects to `/setup` where you create the admin account. After that, new users register via `/register` and must be approved by an admin before logging in. The top toolbar provides app branding, search (placeholder), notifications (placeholder), help (placeholder), and a user menu (theme settings, log out). Admins use the shield icon in the channel list to open the Pending Registrations modal, and can open **Server settings** from the server menu (⋮) or from that modal to adjust server-wide preferences (client-side only; stored in the browser).
 
 ### REST API (JWT required)
 

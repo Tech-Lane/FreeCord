@@ -9,32 +9,39 @@
       <div class="message-loading">Loading messages…</div>
     } @else {
       @for (msg of messages(); track msg.id) {
-        <div class="message">
-          <span class="message-author">{{ msg.authorUsername }}</span>
-          @if (msg.attachmentUrl) {
-            <div class="message-attachment">
-              @if (isImageAttachment(msg.attachmentUrl)) {
-                <img
-                  [src]="getAttachmentFullUrl(msg.attachmentUrl)"
-                  [alt]="msg.content || 'Attachment'"
-                  class="message-attachment-img"
-                />
-              } @else {
-                <a
-                  [href]="getAttachmentFullUrl(msg.attachmentUrl)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="message-attachment-link"
-                  >Download attachment</a
-                >
-              }
-            </div>
-          }
-          @if (msg.content) {
-            <span class="message-content">{{ msg | formatMessageContent | async }}</span>
-          }
-          <span class="message-time">{{ msg.createdAt | date : 'short' }}</span>
-        </div>
+        <article class="message" role="article">
+          <div class="message-avatar" [attr.aria-label]="msg.authorUsername">
+            <span class="message-avatar-initial">{{ getAuthorInitial(msg.authorUsername) }}</span>
+          </div>
+          <div class="message-body">
+            <header class="message-header">
+              <span class="message-author">{{ msg.authorUsername }}</span>
+              <time class="message-time" [attr.datetime]="msg.createdAt">{{ msg.createdAt | date : 'MMM d, y h:mm a' }}</time>
+            </header>
+            @if (msg.content) {
+              <div class="message-content">{{ msg | formatMessageContent | async }}</div>
+            }
+            @if (msg.attachmentUrl) {
+              <div class="message-attachment">
+                @if (isImageAttachment(msg.attachmentUrl)) {
+                  <img
+                    [src]="getAttachmentFullUrl(msg.attachmentUrl)"
+                    [alt]="msg.content || 'Attachment'"
+                    class="message-attachment-img"
+                  />
+                } @else {
+                  <a
+                    [href]="getAttachmentFullUrl(msg.attachmentUrl)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="message-attachment-link"
+                    >Download attachment</a
+                  >
+                }
+              </div>
+            }
+          </div>
+        </article>
       } @empty {
         <div class="message-empty">No messages yet. Start the conversation!</div>
       }
@@ -58,25 +65,32 @@
           </button>
         </span>
       }
-      <div class="chat-input-row">
-        <button type="button" class="chat-attachment-btn" (click)="triggerFileInput()" [disabled]="uploading()">
+      <div class="chat-input-bar">
+        <button type="button" class="chat-attachment-btn" (click)="triggerFileInput()" [disabled]="uploading()" title="Upload file" aria-label="Upload file">
           +
         </button>
-        <input
-          type="text"
+        <div class="chat-input-row">
+        <textarea
           [(ngModel)]="messageDraft"
           name="messageDraft"
           placeholder="Type a message..."
           class="chat-input"
+          rows="1"
           (keydown)="onKeyDown($event)"
-        />
+          aria-label="Message input"
+        ></textarea>
         <button
           type="submit"
           class="chat-send-btn"
           [disabled]="!((messageDraft || '').trim() || pendingAttachmentUrl) || uploading()"
+          title="Send message"
+          aria-label="Send message"
         >
-          Send
+          <svg class="chat-send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </button>
+        </div>
       </div>
     </form>
   </div>

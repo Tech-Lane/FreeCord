@@ -14,6 +14,7 @@ import { FormatMessageContentPipe } from '../../pipes/format-message-content.pip
 import { ApiService, MessageDto } from '../../services/api.service';
 import { environment } from '../../../environments/environment';
 import { ChatHubService, MessageReceivedPayload } from '../../services/chat-hub.service';
+import { getMockChannelName } from '../../mocks/mock-data';
 import { GuildChannelStateService } from '../../services/guild-channel-state.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -88,9 +89,15 @@ export class ChatAreaComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Resolve channel name from state if available
+    // Resolve channel name from state if available (in UI-only, fallback to mock data when channels not yet loaded)
     const channel = this.state.channels().find((c) => c.id === this.channelIdParam);
-    const channelName = channel?.name ?? this.state.selectedChannel()?.name ?? 'channel';
+    let channelName =
+      channel?.name ??
+      this.state.selectedChannel()?.name ??
+      (environment.uiOnly && this.guildIdParam && this.channelIdParam
+        ? getMockChannelName(this.guildIdParam, this.channelIdParam)
+        : null) ??
+      'channel';
 
     // Ensure state is in sync with route
     this.state.setGuild({
@@ -205,6 +212,12 @@ export class ChatAreaComponent implements OnInit, OnDestroy {
   }
 
   /** Full URL for an attachment (prepends API base). */
+  /** Returns the first character of the username for avatar placeholder (Discord-style). */
+  getAuthorInitial(username: string | null | undefined): string {
+    if (!username || username.length === 0) return '?';
+    return username.charAt(0).toUpperCase();
+  }
+
   getAttachmentFullUrl(relativeUrl: string | null | undefined): string {
     if (!relativeUrl) return '';
     const base = environment.apiUrl.replace(/\/$/, '');

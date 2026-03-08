@@ -9,9 +9,10 @@ This guide walks you through all steps needed to get FreeCord up and running. Ch
 1. [Prerequisites](#prerequisites)
 2. [Option A: Docker Deployment (Recommended)](#option-a-docker-deployment-recommended)
 3. [Option B: Local Development Setup](#option-b-local-development-setup)
-4. [Verify the Application](#verify-the-application)
-5. [Production Deployment](#production-deployment)
-6. [Troubleshooting](#troubleshooting)
+4. [UI-only Mode (No Backend)](#ui-only-mode-no-backend)
+5. [Verify the Application](#verify-the-application)
+6. [Production Deployment](#production-deployment)
+7. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -193,6 +194,47 @@ npm run tauri:dev
 
 - `client/src/environments/environment.ts` — development API URL (default: `http://localhost:5000`)
 - `client/src/environments/environment.prod.ts` — production API URL (used by `npm run tauri:build`)
+
+---
+
+## UI-only Mode (No Backend)
+
+You can run the Angular client **without the backend** to tweak the UI and styles. The app uses mock data for guilds, channels, messages, and auth so you can see the full interface in action.
+
+### Run UI-only
+
+From the **client** directory:
+
+```bash
+npm start -- --configuration=ui-only
+```
+
+Or:
+
+```bash
+ng serve --configuration=ui-only
+```
+
+Open `http://localhost:4200`. You are taken straight into the main app with:
+
+- **Mock servers (guilds)**: e.g. "FreeCord Dev", "Gaming Squad", "Open Source"
+- **Mock channels**: text channels (general, random, dev-chat, etc.) and voice channels
+- **Mock messages**: sample conversation in each channel so you can see layout and styling
+- **Mock user**: logged in as "DemoUser" with full permissions
+
+You can click servers and channels, send messages (they appear locally), open theme settings, create invite links, and create/delete servers and channels—all without PostgreSQL, Redis, or the .NET API.
+
+### When to use
+
+- **UI/CSS work**: Change styles, theme variables, or layout without starting the stack.
+- **Quick iteration**: Add or tweak components and see them with realistic data.
+- **Offline**: Develop the client when the backend is unavailable.
+
+### Notes
+
+- Real-time messaging and voice do not work in UI-only mode (no SignalR, no voice service).
+- Mock data is defined in `client/src/app/mocks/mock-data.ts`; you can edit it to add more servers, channels, or messages.
+- For full behavior (login, persistence, voice), use [Option A](#option-a-docker-deployment-recommended) or [Option B](#option-b-local-development-setup).
 
 ---
 

@@ -12,6 +12,7 @@
             [routerLink]="['/app', 'channel', channel.id]"
             routerLinkActive="active"
             class="channel-item"
+            [attr.title]="channel.name"
           >
             <span class="channel-icon">#</span>
             <span class="channel-name">{{ channel.name }}</span>
@@ -28,6 +29,7 @@
             class="channel-item channel-item-voice"
             [class.active]="voiceRoom.isInVoiceChannel() && voiceRoom.currentChannelId() === channel.id"
             [disabled]="joiningVoice"
+            [attr.title]="channel.name"
             (click)="onVoiceChannelClick(channel.id)"
           >
             <span class="channel-icon">🔊</span>

@@ -1,11 +1,16 @@
 /**
- * Environment configuration for the FreeCord client.
- * API and SignalR hub URLs. Override in environment.prod.ts for production.
+ * Development environment.
+ * For UI-only mode (no backend), use: ng serve --configuration=ui-only
  */
 export const environment = {
   production: false,
-  /** Base URL for the .NET API (no trailing slash) */
+  /** Base URL for the .NET API (e.g. http://localhost:5000) */
   apiUrl: 'http://localhost:5000',
-  /** SignalR ChatHub path (relative to apiUrl) */
-  hubPath: '/hubs/chat'
+  /** SignalR hub path (e.g. /hubs/chat) */
+  hubPath: '/hubs/chat',
+  /**
+   * When true, the app runs without the backend: mock data is used for guilds,
+   * channels, messages, and auth. Use for UI development and tweaks.
+   */
+  uiOnly: false
 };

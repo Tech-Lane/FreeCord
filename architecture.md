@@ -152,13 +152,14 @@ voice-service/
 client/
 ├── src/
 │   ├── app/
-│   │   ├── components/       # ServerSidebar, ChannelList, ChatArea, VoiceChannelPanel
-│   │   ├── guards/           # authGuard
-│   │   ├── layouts/           # Main layout (3-column)
-│   │   ├── pages/             # Login, Register
-│   │   ├── services/          # AuthService, ApiService, ChatHubService, GuildChannelStateService, ThemeService, VoiceRoomService, PluginLoaderService, PluginEventBusService
+│   │   ├── components/       # Toolbar, ServerSidebar, ChannelList, ChatArea, VoiceChannelPanel
+│   │   ├── guards/           # authGuard, adminGuard
+│   │   ├── layouts/           # Main layout (toolbar + 3-column body)
+│   │   ├── pages/             # Login, Register, Setup, AdminSettings
+│   │   ├── services/          # AuthService, ApiService, ChatHubService, GuildChannelStateService, ThemeService, VoiceRoomService, SidebarLayoutService, AdminSettingsService, PluginLoaderService, PluginEventBusService
 │   │   ├── pipes/             # FormatMessageContentPipe (plugin message formatting)
-│   │   └── environments/      # API URL, hub path
+│   │   ├── mocks/               # mock-data.ts for UI-only mode
+│   │   └── environments/        # API URL, hub path, uiOnly flag
 │   └── styles.scss            # CSS variables (--bg-primary, --text-main, --accent-color, etc.)
 ├── src-tauri/                 # Tauri Rust backend
 └── angular.json
@@ -166,11 +167,13 @@ client/
 
 ### MVP Components
 
+- **ToolbarComponent** – Top bar across the app: FreeCord branding, search (placeholder), notifications (placeholder), help (placeholder), user menu (avatar, username, dropdown with Theme settings and Log out). Theme settings opens the same ThemeSettingsModal as the channel list gear; logout uses AuthService. Search/notifications/help are client-side placeholders for future backend features.
 - **ServerSidebarComponent** – Fetches and lists user's joined guilds from REST; selecting a guild loads channels and joins SignalR guild group
-- **ChannelListComponent** – Displays text and voice channels for the selected guild; text channels link to chat, voice channels use VoiceRoomService; gear icon opens Theme Settings modal; shield icon (for server admins) opens Pending Registrations modal
+- **ChannelListComponent** – Displays text and voice channels for the selected guild; text channels link to chat, voice channels use VoiceRoomService; server menu includes "Server settings" (admins) and Create Invite / Create Channel / Delete Server; gear icon opens Theme Settings modal; shield icon (for server admins) opens Pending Registrations modal
 - **VoiceChannelPanelComponent** – Shown in channel sidebar when in a voice channel; grid of participant avatars (initials + colored background), mute icon overlay for muted users, glowing CSS border for active speaker; data from ChatHubService.voiceParticipants (updated by VoiceParticipant* events)
 - **ThemeSettingsModalComponent** – Modal for theme customization: color pickers for core CSS variables, text area for custom CSS, live preview; saves via PUT /api/users/me/theme
 - **CreateInviteModalComponent** – Creates invite via POST /api/guilds/{guildId}/invites; copies shortlink (nexchat://invite/code) to clipboard
+- **AdminSettingsComponent** – Full-page server-wide settings (Registration, Invites, Messages, Channels, Security, Notifications, Moderation, Appearance, Voice, Accessibility, Developer). Client-side only: persisted in localStorage via **AdminSettingsService**; backend API and enforcement TBD (see TBD.md).
 - **ChatAreaComponent** – Loads last 50 messages via REST when navigating to a channel; appends new messages from SignalR `MessageReceived`; send input invokes `SendMessage`; '+' button uploads files via `POST /api/media/upload`, attaches URL to next message; images render inline, other files as download links
 
 ### Routing
@@ -179,8 +182,20 @@ client/
 - `/login` – Login screen
 - `/register` – Registration (new users require admin approval)
 - `/invite/:code` – Invite redirect; unauthenticated users are sent to login; authenticated users join the guild and are redirected
-- `/app` – Main layout (Server sidebar | Channel list | Chat), protected by authGuard
+- `/app` – Main layout: top **Toolbar** (branding, search, notifications, help, user menu) and body (Server sidebar | Channel list | Chat), protected by authGuard. Sidebars are individually collapsible and resizable; preferences persisted via **SidebarLayoutService** (localStorage).
 - `/app/guild/:guildId/channel/:channelId` – Chat view for a channel
+- `/app/admin/settings` – Server-wide admin settings page; protected by **adminGuard** (requires `isServerAdmin` from user profile). Settings stored in localStorage only (client-side); see TBD.md for future backend sync.
+
+### UI-only mode
+
+The client can run without the backend for UI development. Use build configuration `ui-only` (`ng serve --configuration=ui-only`). When enabled (`environment.uiOnly`):
+
+- **Default route** redirects to `/app/guild/guild-1/channel/ch-1-1` and sets a mock session so the user is "logged in".
+- **ApiService**, **SetupService**, **AdminService** return mock data (guilds, channels, messages, user profile, permissions) from `app/mocks/mock-data.ts`.
+- **AuthService** login/register set a mock token and user without HTTP.
+- **ChatHubService** does not open a WebSocket; `connect()` sets `isConnected` true, `sendMessage` appends locally to the messages signal, `getChannelHistory` returns mock messages.
+
+Real-time messaging and voice are not available in UI-only mode. See [GETTING_STARTED.md – UI-only mode](GETTING_STARTED.md#ui-only-mode-no-backend).
 
 ### Theming (ThemeService)
 

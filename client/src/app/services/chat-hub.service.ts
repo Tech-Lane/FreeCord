@@ -2,6 +2,7 @@ import { Injectable, signal, inject, DestroyRef } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { getMockMessagesPayload } from '../mocks/mock-data';
 
 /** ICE parameters for mediasoup createSendTransport */
 export interface IceParameters {
@@ -141,10 +142,16 @@ export class ChatHubService {
    * Connects to the ChatHub using the stored JWT from AuthService.
    * accessTokenFactory supplies the token as the access_token query param for WebSocket auth.
    * Call after user logs in. Reconnects automatically use the latest stored token.
+   * In UI-only mode, no WebSocket is opened; isConnected is set true so the UI works with mock data.
    * @param _accessToken - Deprecated; token is always read from AuthService storage.
    */
   async connect(_accessToken?: string): Promise<void> {
     if (this.connection?.state === 'Connected') return;
+
+    if (environment.uiOnly) {
+      this.isConnected.set(true);
+      return;
+    }
 
     const builder = new HubConnectionBuilder()
       .withUrl(HUB_URL, {
@@ -182,6 +189,11 @@ export class ChatHubService {
    * Disconnects from the hub.
    */
   async disconnect(): Promise<void> {
+    if (environment.uiOnly) {
+      this.isConnected.set(false);
+      this.messages.set([]);
+      return;
+    }
     if (this.connection) {
       await this.connection.stop();
       this.connection = null;
@@ -193,22 +205,27 @@ export class ChatHubService {
   /**
    * Joins a guild group to receive messages for that guild.
    * Call when user selects a guild.
+   * No-op in UI-only mode.
    */
   async joinGroup(guildId: string): Promise<void> {
+    if (environment.uiOnly) return;
     if (!this.connection || this.connection.state !== 'Connected') return;
     await this.connection.invoke('JoinGroup', guildId);
   }
 
   /**
    * Leaves a guild group.
+   * No-op in UI-only mode.
    */
   async leaveGroup(guildId: string): Promise<void> {
+    if (environment.uiOnly) return;
     if (!this.connection || this.connection.state !== 'Connected') return;
     await this.connection.invoke('LeaveGroup', guildId);
   }
 
   /**
    * Sends a message to a channel. Server broadcasts via MessageReceived.
+   * In UI-only mode, appends a mock message to the current channel so the user sees it.
    * @param attachmentUrl - Optional relative URL from media upload (e.g. /uploads/xyz.png)
    */
   async sendMessage(
@@ -217,6 +234,21 @@ export class ChatHubService {
     content: string,
     attachmentUrl?: string | null
   ): Promise<void> {
+    if (environment.uiOnly) {
+      if (this.currentChannelId !== channelId) return;
+      const payload: MessageReceivedPayload = {
+        id: `mock-${Date.now()}`,
+        channelId,
+        authorId: this.auth.userId(),
+        authorUsername: this.auth.username(),
+        content,
+        createdAt: new Date().toISOString(),
+        editedAt: null,
+        attachmentUrl: attachmentUrl ?? null
+      };
+      this.messages.update((prev) => [...prev, this.normalizePayload(payload)]);
+      return;
+    }
     if (!this.connection || this.connection.state !== 'Connected') return;
     await this.connection.invoke('SendMessage', guildId, channelId, content, attachmentUrl ?? null);
   }
@@ -267,8 +299,14 @@ export class ChatHubService {
 
   /**
    * Fetches the last 50 messages for a channel.
+   * In UI-only mode, returns mock messages for the channel.
    */
   async getChannelHistory(guildId: string, channelId: string): Promise<MessageReceivedPayload[]> {
+    if (environment.uiOnly) {
+      const normalized = getMockMessagesPayload(channelId);
+      this.messages.set(normalized);
+      return normalized;
+    }
     if (!this.connection || this.connection.state !== 'Connected') return [];
     const raw = await this.connection.invoke<unknown[]>('GetChannelHistory', guildId, channelId);
     const normalized = (raw ?? []).map(p => this.normalizePayload(p as MessageReceivedPayload));

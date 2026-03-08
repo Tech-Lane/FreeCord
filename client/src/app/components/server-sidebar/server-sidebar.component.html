@@ -16,6 +16,7 @@
         [class.active]="selectedGuildId() === guild.id"
         [attr.aria-label]="'Switch to ' + guild.name"
         [attr.aria-pressed]="selectedGuildId() === guild.id"
+        [attr.title]="guild.name"
         (click)="selectGuild(guild)"
       >
         <span class="guild-icon">{{ guild.name.charAt(0) }}</span>

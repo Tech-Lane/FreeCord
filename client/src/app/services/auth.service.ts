@@ -2,7 +2,9 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { MOCK_TOKEN, MOCK_USER } from '../mocks/mock-data';
 
 /** JWT and user info returned from auth endpoints */
 export interface AuthResponse {
@@ -61,8 +63,23 @@ export class AuthService {
 
   /**
    * Logs in with email and password. Stores token and username on success.
+   * In UI-only mode, any credentials succeed and set a mock session.
    */
-  login(email: string, password: string) {
+  login(email: string, password: string): Observable<AuthResponse> {
+    if (environment.uiOnly) {
+      const res: AuthResponse = {
+        token: MOCK_TOKEN,
+        userId: MOCK_USER.id,
+        username: MOCK_USER.username
+      };
+      localStorage.setItem(this.storageKey, res.token);
+      localStorage.setItem(this.userKey, res.username);
+      localStorage.setItem(this.userIdKey, res.userId);
+      this.token.set(res.token);
+      this.username.set(res.username);
+      this.userId.set(res.userId);
+      return of(res);
+    }
     return this.http
       .post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, { email, password })
       .pipe(
@@ -80,8 +97,23 @@ export class AuthService {
   /**
    * Registers a new user. New registrations require admin approval;
    * response includes pendingApproval flag and does not include token.
+   * In UI-only mode, acts like immediate approval and sets mock session.
    */
   register(username: string, email: string, password: string) {
+    if (environment.uiOnly) {
+      const res: AuthResponse = {
+        token: MOCK_TOKEN,
+        userId: MOCK_USER.id,
+        username: username || MOCK_USER.username
+      };
+      localStorage.setItem(this.storageKey, res.token);
+      localStorage.setItem(this.userKey, res.username);
+      localStorage.setItem(this.userIdKey, res.userId);
+      this.token.set(res.token);
+      this.username.set(res.username);
+      this.userId.set(res.userId);
+      return of(res);
+    }
     return this.http.post<AuthResponse | { message: string; pendingApproval: boolean }>(
       `${environment.apiUrl}/api/auth/register`,
       { username, email, password }
@@ -118,5 +150,17 @@ export class AuthService {
     this.token.set(res.token);
     this.username.set(res.username);
     this.userId.set(res.userId);
+  }
+
+  /**
+   * Sets a mock session for UI-only mode (no backend).
+   * Called by auth guard when uiOnly and user is not yet authenticated.
+   */
+  setMockSession(): void {
+    this.setSessionFromResponse({
+      token: MOCK_TOKEN,
+      userId: MOCK_USER.id,
+      username: MOCK_USER.username
+    });
   }
 }

@@ -19,6 +19,11 @@
           </button>
           @if (menuOpen()) {
             <div class="dropdown-menu" role="menu">
+              @if (isServerAdmin()) {
+                <a routerLink="/app/admin/settings" class="dropdown-item" (click)="closeMenu()" role="menuitem">
+                  Server settings
+                </a>
+              }
               @if (canCreateInvite()) {
                 <button type="button" class="dropdown-item" (click)="onCreateInvite()" role="menuitem">
                   Create Invite
@@ -71,6 +76,7 @@
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: false }"
             class="channel-item"
+            [attr.title]="channel.name"
             (click)="state.setChannel({ id: channel.id, name: channel.name, type: 'text' })"
           >
             <span class="channel-icon">#</span>
@@ -88,6 +94,7 @@
             class="channel-item channel-item-voice"
             [class.active]="voiceRoom.isInVoiceChannel() && voiceRoom.currentChannelId() === channel.id"
             [disabled]="joiningVoice"
+            [attr.title]="channel.name"
             (click)="onVoiceChannelClick(channel.id)"
           >
             <span class="channel-icon">&#128266;</span>

@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AdminService, PendingUserDto } from '../../services/admin.service';
 
 /**
@@ -15,6 +16,7 @@ import { AdminService, PendingUserDto } from '../../services/admin.service';
 })
 export class AdminModalComponent implements OnInit {
   private readonly admin = inject(AdminService);
+  private readonly router = inject(Router);
 
   readonly close = output<void>();
 
@@ -73,6 +75,12 @@ export class AdminModalComponent implements OnInit {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  /** Navigate to the Server-wide Settings page and close the modal */
+  navigateToServerSettings(): void {
+    this.close.emit();
+    this.router.navigate(['/app/admin/settings']);
   }
 
   /** Format date for display */

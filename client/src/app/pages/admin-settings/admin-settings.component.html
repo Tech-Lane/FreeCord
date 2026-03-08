@@ -1,0 +1,359 @@
+<div class="admin-settings-page">
+  <header class="admin-settings-header">
+    <h1 class="admin-settings-title">Server-wide settings</h1>
+    <p class="admin-settings-subtitle">
+      These preferences are stored in your browser only (client-side). Server enforcement and sync are planned for a future release.
+    </p>
+    <div class="admin-settings-actions">
+      <a routerLink="/app" class="btn-secondary">Back to app</a>
+      <button type="button" class="btn-secondary" (click)="resetToDefaults()">Reset to defaults</button>
+      <button type="button" class="btn-primary" (click)="save()">
+        {{ savedFeedback() ? 'Saved' : 'Save' }}
+      </button>
+    </div>
+  </header>
+
+  <div class="admin-settings-sections">
+    <!-- Registration -->
+    <section class="settings-section" aria-labelledby="section-registration">
+      <h2 id="section-registration" class="section-title">Registration</h2>
+      <div class="section-fields">
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().registrationAllowSignup"
+            (change)="update('registrationAllowSignup', $any($event.target).checked)"
+          />
+          <span>Allow new user sign-ups</span>
+        </label>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().registrationRequireApproval"
+            (change)="update('registrationRequireApproval', $any($event.target).checked)"
+          />
+          <span>Require admin approval for new registrations</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Invites -->
+    <section class="settings-section" aria-labelledby="section-invites">
+      <h2 id="section-invites" class="section-title">Invites</h2>
+      <div class="section-fields">
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().inviteAllowCreating"
+            (change)="update('inviteAllowCreating', $any($event.target).checked)"
+          />
+          <span>Allow creating invite links</span>
+        </label>
+        <div class="field-row">
+          <label for="invite-expiration">Default invite expiration (minutes, 0 = never)</label>
+          <input
+            id="invite-expiration"
+            type="number"
+            min="0"
+            [ngModel]="settings().inviteDefaultExpirationMinutes"
+            (ngModelChange)="update('inviteDefaultExpirationMinutes', $event)"
+          />
+        </div>
+        <div class="field-row">
+          <label for="invite-max-uses">Default max uses per invite (0 = unlimited)</label>
+          <input
+            id="invite-max-uses"
+            type="number"
+            min="0"
+            [ngModel]="settings().inviteDefaultMaxUses"
+            (ngModelChange)="update('inviteDefaultMaxUses', $event)"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Messages & attachments -->
+    <section class="settings-section" aria-labelledby="section-messages">
+      <h2 id="section-messages" class="section-title">Messages &amp; attachments</h2>
+      <div class="section-fields">
+        <div class="field-row">
+          <label for="message-max-length">Max message length (characters)</label>
+          <input
+            id="message-max-length"
+            type="number"
+            min="1"
+            max="4000"
+            [ngModel]="settings().messageMaxLength"
+            (ngModelChange)="update('messageMaxLength', $event)"
+          />
+        </div>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().messageAllowAttachments"
+            (change)="update('messageAllowAttachments', $any($event.target).checked)"
+          />
+          <span>Allow file attachments</span>
+        </label>
+        <div class="field-row">
+          <label for="message-max-size">Max attachment size (MB)</label>
+          <input
+            id="message-max-size"
+            type="number"
+            min="0"
+            max="100"
+            [ngModel]="settings().messageMaxAttachmentSizeMb"
+            (ngModelChange)="update('messageMaxAttachmentSizeMb', $event)"
+          />
+        </div>
+        <div class="field-row">
+          <label for="message-file-types">Allowed file types (comma-separated; empty = backend default)</label>
+          <input
+            id="message-file-types"
+            type="text"
+            placeholder="e.g. .pdf,.png,.jpg"
+            [ngModel]="settings().messageAllowedFileTypes"
+            (ngModelChange)="update('messageAllowedFileTypes', $event)"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Channels -->
+    <section class="settings-section" aria-labelledby="section-channels">
+      <h2 id="section-channels" class="section-title">Channels</h2>
+      <div class="section-fields">
+        <div class="field-row">
+          <label for="channel-max">Max channels per server (0 = no client limit)</label>
+          <input
+            id="channel-max"
+            type="number"
+            min="0"
+            [ngModel]="settings().channelMaxPerGuild"
+            (ngModelChange)="update('channelMaxPerGuild', $event)"
+          />
+        </div>
+        <div class="field-row">
+          <label for="channel-default-type">Default channel type when creating</label>
+          <select
+            id="channel-default-type"
+            [ngModel]="settings().channelDefaultType"
+            (ngModelChange)="update('channelDefaultType', $event)"
+          >
+            <option value="text">Text</option>
+            <option value="voice">Voice</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Security -->
+    <section class="settings-section" aria-labelledby="section-security">
+      <h2 id="section-security" class="section-title">Security</h2>
+      <div class="section-fields">
+        <div class="field-row">
+          <label for="session-timeout">Session timeout (minutes, 0 = no timeout)</label>
+          <input
+            id="session-timeout"
+            type="number"
+            min="0"
+            [ngModel]="settings().securitySessionTimeoutMinutes"
+            (ngModelChange)="update('securitySessionTimeoutMinutes', $event)"
+          />
+        </div>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().securityRequireEmailVerification"
+            (change)="update('securityRequireEmailVerification', $any($event.target).checked)"
+          />
+          <span>Require email verification (placeholder; backend TBD)</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="settings-section" aria-labelledby="section-notifications">
+      <h2 id="section-notifications" class="section-title">Notifications</h2>
+      <div class="section-fields">
+        <div class="field-row">
+          <label for="notification-level">Default notification level</label>
+          <select
+            id="notification-level"
+            [ngModel]="settings().notificationDefaultLevel"
+            (ngModelChange)="update('notificationDefaultLevel', $event)"
+          >
+            <option value="all">All messages</option>
+            <option value="mentions">Mentions only</option>
+            <option value="none">Nothing</option>
+          </select>
+        </div>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().notificationSoundEnabled"
+            (change)="update('notificationSoundEnabled', $any($event.target).checked)"
+          />
+          <span>Play sound on new message</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Moderation -->
+    <section class="settings-section" aria-labelledby="section-moderation">
+      <h2 id="section-moderation" class="section-title">Moderation</h2>
+      <div class="section-fields">
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().moderationFilterProfanity"
+            (change)="update('moderationFilterProfanity', $any($event.target).checked)"
+          />
+          <span>Filter profanity (client placeholder)</span>
+        </label>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().moderationAutoDeleteLinks"
+            (change)="update('moderationAutoDeleteLinks', $any($event.target).checked)"
+          />
+          <span>Auto-delete messages containing links (placeholder)</span>
+        </label>
+        <div class="field-row">
+          <label for="slow-mode">Slow mode (seconds between messages, 0 = off)</label>
+          <input
+            id="slow-mode"
+            type="number"
+            min="0"
+            [ngModel]="settings().moderationSlowModeSeconds"
+            (ngModelChange)="update('moderationSlowModeSeconds', $event)"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Appearance -->
+    <section class="settings-section" aria-labelledby="section-appearance">
+      <h2 id="section-appearance" class="section-title">Appearance</h2>
+      <div class="section-fields">
+        <div class="field-row">
+          <label for="default-theme">Default theme</label>
+          <select
+            id="default-theme"
+            [ngModel]="settings().appearanceDefaultTheme"
+            (ngModelChange)="update('appearanceDefaultTheme', $event)"
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().appearanceShowMemberList"
+            (change)="update('appearanceShowMemberList', $any($event.target).checked)"
+          />
+          <span>Show member list in channel view</span>
+        </label>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().appearanceCompactMode"
+            (change)="update('appearanceCompactMode', $any($event.target).checked)"
+          />
+          <span>Compact message layout</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Voice -->
+    <section class="settings-section" aria-labelledby="section-voice">
+      <h2 id="section-voice" class="section-title">Voice</h2>
+      <div class="section-fields">
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().voiceDefaultPushToTalk"
+            (change)="update('voiceDefaultPushToTalk', $any($event.target).checked)"
+          />
+          <span>Default to push-to-talk</span>
+        </label>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().voiceEchoCancellation"
+            (change)="update('voiceEchoCancellation', $any($event.target).checked)"
+          />
+          <span>Echo cancellation</span>
+        </label>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().voiceNoiseSuppression"
+            (change)="update('voiceNoiseSuppression', $any($event.target).checked)"
+          />
+          <span>Noise suppression</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Accessibility -->
+    <section class="settings-section" aria-labelledby="section-accessibility">
+      <h2 id="section-accessibility" class="section-title">Accessibility</h2>
+      <div class="section-fields">
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().accessibilityReducedMotion"
+            (change)="update('accessibilityReducedMotion', $any($event.target).checked)"
+          />
+          <span>Reduced motion</span>
+        </label>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().accessibilityHighContrast"
+            (change)="update('accessibilityHighContrast', $any($event.target).checked)"
+          />
+          <span>High contrast UI</span>
+        </label>
+        <div class="field-row">
+          <label for="font-size-scale">Font size scale (1 = normal)</label>
+          <input
+            id="font-size-scale"
+            type="number"
+            min="0.75"
+            max="2"
+            step="0.25"
+            [ngModel]="settings().accessibilityFontSizeScale"
+            (ngModelChange)="update('accessibilityFontSizeScale', $event)"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Developer -->
+    <section class="settings-section" aria-labelledby="section-developer">
+      <h2 id="section-developer" class="section-title">Developer</h2>
+      <div class="section-fields">
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().developerDebugMode"
+            (change)="update('developerDebugMode', $any($event.target).checked)"
+          />
+          <span>Show debug info in UI</span>
+        </label>
+        <label class="field-row field-checkbox">
+          <input
+            type="checkbox"
+            [checked]="settings().developerShowApiUrl"
+            (change)="update('developerShowApiUrl', $any($event.target).checked)"
+          />
+          <span>Show API base URL (for deployment)</span>
+        </label>
+      </div>
+    </section>
+  </div>
+</div>

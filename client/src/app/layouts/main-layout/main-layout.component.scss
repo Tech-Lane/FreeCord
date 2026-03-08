@@ -1,28 +1,154 @@
 /**
- * Main layout styles. Three-column Discord-like layout.
+ * Main layout styles. Top toolbar + three-column Discord-like layout.
  */
 .main-layout {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   width: 100%;
   background: var(--bg-primary);
   overflow: hidden;
+
+  &.resizing-guild,
+  &.resizing-channel {
+    cursor: col-resize;
+    user-select: none;
+  }
 }
 
-.guild-sidebar {
-  flex-shrink: 0;
-  width: var(--guild-sidebar-width);
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-subtle);
-}
-
+/* Sidebar container: top bar (collapse button) + content column */
+.guild-sidebar,
 .channel-sidebar {
   flex-shrink: 0;
-  width: var(--channel-sidebar-width);
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
+  position: relative;
+  transition: width var(--transition-fast);
+}
+
+/* Top bar: small area for collapse/expand button only */
+.sidebar-top-bar {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.guild-sidebar.collapsed .sidebar-top-bar,
+.channel-sidebar.collapsed .sidebar-top-bar {
+  border-bottom: none;
+  justify-content: center;
+  min-height: 48px;
+  padding: var(--spacing-sm) 0;
+}
+
+.guild-sidebar .sidebar-content,
+.channel-sidebar .sidebar-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.channel-sidebar .sidebar-content {
+  flex-direction: column;
+}
+
+.sidebar-content.hidden {
+  visibility: hidden;
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: absolute;
+  pointer-events: none;
+  flex: 0;
+}
+
+/* Modern collapse/expand icon button at top of sidebar */
+.sidebar-collapse-btn {
+  --btn-size: 28px;
+  width: var(--btn-size);
+  height: var(--btn-size);
+  min-width: var(--btn-size);
+  min-height: var(--btn-size);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-main);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+}
+
+.collapse-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Collapsed state: button fits in narrow strip */
+.guild-sidebar.collapsed .sidebar-collapse-btn,
+.channel-sidebar.collapsed .sidebar-collapse-btn {
+  --btn-size: 20px;
+}
+
+.guild-sidebar.collapsed .collapse-icon,
+.channel-sidebar.collapsed .collapse-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Resize handle between sidebars and chat */
+.resize-handle {
+  flex-shrink: 0;
+  width: 4px;
+  min-width: 4px;
+  background: transparent;
+  cursor: col-resize;
+  transition: background var(--transition-fast);
+
+  &:hover,
+  .main-layout.resizing-guild &:hover,
+  .main-layout.resizing-channel &:hover {
+    background: var(--accent-muted);
+  }
+}
+
+.main-layout.resizing-guild .resize-handle-guild,
+.main-layout.resizing-channel .resize-handle-channel {
+  background: var(--accent-muted);
+}
+
+/* Body row: sidebars + chat (below toolbar) */
+.main-layout-body {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
 }
 
 .chat-area {

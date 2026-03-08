@@ -48,6 +48,7 @@
     </div>
 
     <footer class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="navigateToServerSettings()">Server settings</button>
       <button type="button" class="btn-secondary" (click)="onClose()">Close</button>
       @if (!loading() && !error() && pendingUsers().length > 0) {
         <button type="button" class="btn-secondary" (click)="loadPending()">Refresh</button>

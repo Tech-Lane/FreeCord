@@ -1,20 +1,28 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { inviteRedirectGuard } from './guards/invite-redirect.guard';
 import { setupGuard } from './guards/setup.guard';
 import { initializedGuard } from './guards/initialized.guard';
 
 /**
  * Application routing configuration.
+ * - /: Default route; DefaultRedirectComponent sends to /app (UI-only) or /setup
  * - /setup: First-time setup (create admin) - only when server has no users
  * - /login: Unauthenticated login screen
  * - /register: Registration (pending admin approval)
  * - /invite/:code: Handles invite links; redirects to login if not authenticated, else joins guild
  * - /app: Main layout (server sidebar, channel list, chat area)
  * - /app/guild/:guildId/channel/:channelId: Chat view for a specific channel
+ * - /app/admin/settings: Server-wide admin settings (admin only; client-side storage)
  */
 export const routes: Routes = [
-  { path: '', redirectTo: '/setup', pathMatch: 'full' },
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./components/default-redirect/default-redirect.component').then(m => m.DefaultRedirectComponent)
+  },
   {
     path: 'setup',
     canActivate: [setupGuard],
@@ -44,6 +52,11 @@ export const routes: Routes = [
       {
         path: 'guild/:guildId/channel/:channelId',
         loadComponent: () => import('./components/chat-area/chat-area.component').then(m => m.ChatAreaComponent)
+      },
+      {
+        path: 'admin/settings',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./pages/admin-settings/admin-settings.component').then(m => m.AdminSettingsComponent)
       }
     ]
   },

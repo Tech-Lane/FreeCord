@@ -1,26 +1,108 @@
-<div class="main-layout" [class.voice-active]="voiceRoom.isInVoiceChannel()">
-  <!-- Server list sidebar (left) -->
-  <aside class="guild-sidebar">
-    <app-server-sidebar />
+<div
+  class="main-layout"
+  [class.voice-active]="voiceRoom.isInVoiceChannel()"
+  [class.resizing-guild]="resizing() === 'guild'"
+  [class.resizing-channel]="resizing() === 'channel'"
+  [style.--guild-sidebar-width.px]="layout.effectiveGuildWidth()"
+  [style.--channel-sidebar-width.px]="layout.effectiveChannelWidth()"
+>
+  <!-- Top toolbar: branding, search, notifications, help, admin (when server admin), user menu -->
+  <app-toolbar [isServerAdmin]="isServerAdmin()" (openThemeSettings)="openThemeModal()" />
+
+  <div class="main-layout-body">
+  <!-- Server list sidebar (left): expand/collapse and resizable -->
+  <aside
+    class="guild-sidebar"
+    [class.collapsed]="layout.guildCollapsed()"
+    [style.width.px]="layout.effectiveGuildWidth()"
+  >
+    <div class="sidebar-top-bar">
+      <button
+        type="button"
+        class="sidebar-collapse-btn"
+        (click)="layout.toggleGuild()"
+        [attr.aria-label]="layout.guildCollapsed() ? 'Expand server list' : 'Collapse server list'"
+        [attr.title]="layout.guildCollapsed() ? 'Expand server list' : 'Collapse server list'"
+      >
+        @if (layout.guildCollapsed()) {
+          <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        } @else {
+          <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        }
+      </button>
+    </div>
+    <div class="sidebar-content" [class.hidden]="layout.guildCollapsed()">
+      <app-server-sidebar />
+    </div>
   </aside>
 
-  <!-- Channel list sidebar (includes header with theme settings and create invite) -->
-  <aside class="channel-sidebar">
-    <app-channel-list
-      [isServerAdmin]="isServerAdmin()"
-      (openThemeSettings)="openThemeModal()"
-      (openCreateInvite)="openInviteModal()"
-      (openAdmin)="openAdminModal()"
-    />
-    @if (voiceRoom.isInVoiceChannel()) {
-      <app-voice-channel-panel [channelName]="currentVoiceChannelName()" />
-    }
+  <!-- Resize handle for guild sidebar (only when expanded) -->
+  @if (!layout.guildCollapsed()) {
+    <div
+      class="resize-handle resize-handle-guild"
+      role="separator"
+      aria-label="Resize server list"
+      (mousedown)="startResizeGuild($event)"
+    ></div>
+  }
+
+  <!-- Channel list sidebar: expand/collapse and resizable -->
+  <aside
+    class="channel-sidebar"
+    [class.collapsed]="layout.channelCollapsed()"
+    [style.width.px]="layout.effectiveChannelWidth()"
+  >
+    <div class="sidebar-top-bar">
+      <button
+        type="button"
+        class="sidebar-collapse-btn"
+        (click)="layout.toggleChannel()"
+        [attr.aria-label]="layout.channelCollapsed() ? 'Expand channel list' : 'Collapse channel list'"
+        [attr.title]="layout.channelCollapsed() ? 'Expand channel list' : 'Collapse channel list'"
+      >
+        @if (layout.channelCollapsed()) {
+          <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        } @else {
+          <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        }
+      </button>
+    </div>
+    <div class="sidebar-content" [class.hidden]="layout.channelCollapsed()">
+      <app-channel-list
+        [isServerAdmin]="isServerAdmin()"
+        (openThemeSettings)="openThemeModal()"
+        (openCreateInvite)="openInviteModal()"
+        (openAdmin)="openAdminModal()"
+      />
+      @if (voiceRoom.isInVoiceChannel()) {
+        <app-voice-channel-panel [channelName]="currentVoiceChannelName()" />
+      }
+    </div>
   </aside>
+
+  <!-- Resize handle for channel sidebar (only when expanded) -->
+  @if (!layout.channelCollapsed()) {
+    <div
+      class="resize-handle resize-handle-channel"
+      role="separator"
+      aria-label="Resize channel list"
+      (mousedown)="startResizeChannel($event)"
+    ></div>
+  }
 
   <!-- Main chat area -->
   <main class="chat-area">
     <router-outlet />
   </main>
+  </div>
 
   <!-- Voice controls bar (Mute / Deafen) when in voice channel -->
   @if (voiceRoom.isInVoiceChannel()) {

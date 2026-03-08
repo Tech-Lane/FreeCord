@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ApiService, GuildDto } from '../../services/api.service';
 import { GuildChannelStateService } from '../../services/guild-channel-state.service';
 import { ChatHubService } from '../../services/chat-hub.service';
@@ -22,6 +23,7 @@ export class ServerSidebarComponent implements OnInit {
   private readonly state = inject(GuildChannelStateService);
   private readonly chatHub = inject(ChatHubService);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   /** Guilds fetched from API */
   guilds = new Array<GuildDto>();
@@ -79,13 +81,39 @@ export class ServerSidebarComponent implements OnInit {
 
   /**
    * Handles guild selection. Updates state, loads channels and permissions, joins SignalR group.
+   * If switching to a different guild, selects the first text channel and navigates.
+   * If already in this guild, keeps the current channel (only refreshes the channel list).
    */
   async selectGuild(guild: GuildDto): Promise<void> {
+    const wasAlreadyInGuild = this.state.selectedGuild()?.id === guild.id;
     this.state.setGuild({ id: guild.id, name: guild.name });
 
     // Load channels for this guild
     this.api.getChannels(guild.id).subscribe((channels) => {
       this.state.setChannels(channels);
+      const currentChannel = this.state.selectedChannel();
+      const currentStillValid =
+        wasAlreadyInGuild &&
+        currentChannel &&
+        channels.some((c) => c.id === currentChannel.id);
+
+      if (currentStillValid) {
+        // Same guild and current channel still exists: stay on it, do not navigate
+        return;
+      }
+
+      const firstText = channels.find((c) => c.type === 'Text' || c.type === 0);
+      const firstChannel = firstText ?? channels[0];
+      if (firstChannel) {
+        this.state.setChannel({
+          id: firstChannel.id,
+          name: firstChannel.name,
+          type: firstChannel.type === 'Voice' || firstChannel.type === 1 ? 'voice' : 'text'
+        });
+        this.router.navigate(['/app', 'guild', guild.id, 'channel', firstChannel.id]);
+      } else {
+        this.router.navigate(['/app']);
+      }
     });
 
     // Load current user's permissions for this guild (for conditional UI: Create Channel, Delete Server)
