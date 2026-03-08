@@ -35,6 +35,16 @@ public sealed class VoiceCoordinationService : IVoiceCoordinationService
     }
 
     /// <inheritdoc />
+    public async Task<string> GetRouterRtpCapabilitiesAsync(CancellationToken cancellationToken = default)
+    {
+        var client = new VoiceService.VoiceServiceClient(_channel);
+        var response = await client.GetRouterRtpCapabilitiesAsync(
+            new GetRouterRtpCapabilitiesRequest(),
+            cancellationToken: cancellationToken);
+        return response.RouterRtpCapabilitiesJson ?? "{}";
+    }
+
+    /// <inheritdoc />
     public async Task<VoiceConnectionDetails> ProvisionWebRtcTransportAsync(
         string? appData = null,
         CancellationToken cancellationToken = default)
@@ -69,6 +79,43 @@ public sealed class VoiceCoordinationService : IVoiceCoordinationService
             iceParams,
             iceCandidates,
             dtlsParams);
+    }
+
+    /// <inheritdoc />
+    public async Task ConnectTransportAsync(
+        string transportId,
+        ChatApp.Core.Services.DtlsParameters dtlsParameters,
+        CancellationToken cancellationToken = default)
+    {
+        var client = new VoiceService.VoiceServiceClient(_channel);
+        var request = new ConnectTransportRequest
+        {
+            TransportId = transportId,
+            DtlsParameters = new ChatApp.Infra.Voice.DtlsParameters
+            {
+                Role = dtlsParameters.Role,
+                Fingerprints = { dtlsParameters.Fingerprints.Select(f => new global::ChatApp.Infra.Voice.DtlsFingerprint { Algorithm = f.Algorithm, Value = f.Value }) }
+            }
+        };
+        await client.ConnectTransportAsync(request, cancellationToken: cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<string> ProduceAsync(
+        string transportId,
+        string kind,
+        string rtpParametersJson,
+        CancellationToken cancellationToken = default)
+    {
+        var client = new VoiceService.VoiceServiceClient(_channel);
+        var request = new ProduceRequest
+        {
+            TransportId = transportId,
+            Kind = kind,
+            RtpParametersJson = rtpParametersJson
+        };
+        var response = await client.ProduceAsync(request, cancellationToken: cancellationToken);
+        return response.ProducerId ?? string.Empty;
     }
 
     private static ChatApp.Core.Services.IceParameters MapIceParameters(global::ChatApp.Infra.Voice.IceParameters proto)

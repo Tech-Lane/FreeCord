@@ -1,0 +1,30 @@
+<div class="voice-channel-panel">
+  <header class="voice-panel-header">
+    <span class="voice-panel-title">{{ channelName() }}</span>
+    <span class="voice-panel-count">{{ participants().length }} in voice</span>
+  </header>
+
+  <div class="voice-participants-grid">
+    @for (p of participants(); track p.connectionId) {
+      <div
+        class="voice-avatar-wrapper"
+        [class.voice-avatar-speaking]="p.isSpeaking"
+        [class.voice-avatar-self]="p.userId === currentUserId()"
+      >
+        <div
+          class="voice-avatar"
+          [style.background-color]="getAvatarColor(p.username)"
+          [attr.aria-label]="p.username"
+        >
+          {{ getInitials(p.username) }}
+        </div>
+        @if (p.isMuted) {
+          <span class="voice-muted-icon" aria-label="Muted">&#128263;</span>
+        }
+        <span class="voice-username">{{ p.username }}</span>
+      </div>
+    } @empty {
+      <p class="voice-panel-empty">No one in voice yet</p>
+    }
+  </div>
+</div>

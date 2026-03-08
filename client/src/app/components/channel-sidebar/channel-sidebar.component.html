@@ -23,12 +23,24 @@
       <span class="channel-group-label">Voice Channels</span>
       @for (channel of channels; track channel.id) {
         @if (channel.type === 'voice') {
-          <button type="button" class="channel-item channel-item-voice">
+          <button
+            type="button"
+            class="channel-item channel-item-voice"
+            [class.active]="voiceRoom.isInVoiceChannel() && voiceRoom.currentChannelId() === channel.id"
+            [disabled]="joiningVoice"
+            (click)="onVoiceChannelClick(channel.id)"
+          >
             <span class="channel-icon">🔊</span>
             <span class="channel-name">{{ channel.name }}</span>
+            @if (voiceRoom.isInVoiceChannel() && voiceRoom.currentChannelId() === channel.id) {
+              <span class="channel-voice-status">● Connected</span>
+            }
           </button>
         }
       }
     </div>
+    @if (voiceError) {
+      <p class="channel-voice-error">{{ voiceError }}</p>
+    }
   </nav>
 </div>

@@ -1,0 +1,31 @@
+<nav class="server-sidebar-nav" aria-label="Server list">
+  <div class="guild-list">
+    <button
+      type="button"
+      class="guild-item guild-item-add"
+      aria-label="Create server"
+      title="Create server"
+      (click)="onCreateServer()"
+    >
+      +
+    </button>
+    @for (guild of guilds; track guild.id) {
+      <button
+        type="button"
+        class="guild-item"
+        [class.active]="selectedGuildId() === guild.id"
+        [attr.aria-label]="'Switch to ' + guild.name"
+        [attr.aria-pressed]="selectedGuildId() === guild.id"
+        (click)="selectGuild(guild)"
+      >
+        <span class="guild-icon">{{ guild.name.charAt(0) }}</span>
+      </button>
+    }
+  </div>
+  @if (loading) {
+    <div class="guild-loading" aria-live="polite">Loading…</div>
+  }
+  @if (error) {
+    <p class="guild-error">{{ error }}</p>
+  }
+</nav>

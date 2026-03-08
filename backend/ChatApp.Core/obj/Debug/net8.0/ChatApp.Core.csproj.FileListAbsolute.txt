@@ -9,3 +9,4 @@ c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\C
 c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\refint\ChatApp.Core.dll
 c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.pdb
 c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ref\ChatApp.Core.dll
+C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Core\obj\Debug\net8.0\ChatApp.Core.sourcelink.json

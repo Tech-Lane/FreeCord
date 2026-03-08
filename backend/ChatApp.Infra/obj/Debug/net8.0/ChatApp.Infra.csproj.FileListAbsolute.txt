@@ -13,3 +13,4 @@ c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Infra\obj\Debug\net8.0\
 c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Infra\obj\Debug\net8.0\refint\ChatApp.Infra.dll
 c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Infra\obj\Debug\net8.0\ChatApp.Infra.pdb
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Infra\obj\Debug\net8.0\ref\ChatApp.Infra.dll
+C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Infra\obj\Debug\net8.0\ChatApp.Infra.sourcelink.json

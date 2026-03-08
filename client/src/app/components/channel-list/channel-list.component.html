@@ -1,0 +1,98 @@
+<div class="channel-list-content">
+  <header class="channel-list-header">
+    <h2 class="guild-name">{{ selectedGuild()?.name ?? 'Select a server' }}</h2>
+    <div class="header-actions">
+      @if (canManageChannels() || canManageGuild() || canCreateInvite()) {
+        @if (menuOpen()) {
+          <div class="dropdown-backdrop" (click)="closeMenu()" aria-hidden="true"></div>
+        }
+        <div class="dropdown">
+          <button
+            type="button"
+            class="settings-btn"
+            (click)="toggleMenu()"
+            title="Server menu"
+            aria-label="Server menu"
+            aria-expanded="menuOpen()"
+          >
+            &#8942;
+          </button>
+          @if (menuOpen()) {
+            <div class="dropdown-menu" role="menu">
+              @if (canCreateInvite()) {
+                <button type="button" class="dropdown-item" (click)="onCreateInvite()" role="menuitem">
+                  Create Invite
+                </button>
+              }
+              @if (canManageChannels()) {
+                <button type="button" class="dropdown-item" (click)="onCreateChannel()" role="menuitem">
+                  Create Channel
+                </button>
+              }
+              @if (canManageGuild()) {
+                <button type="button" class="dropdown-item dropdown-item-danger" (click)="onDeleteServer()" role="menuitem">
+                  Delete Server
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+      <button
+        type="button"
+        class="settings-btn"
+        (click)="openThemeSettings.emit()"
+        title="Theme settings"
+        aria-label="Open theme settings"
+      >
+        &#9881;
+      </button>
+    </div>
+  </header>
+
+  <nav class="channel-list-nav">
+    @if (textChannels().length > 0) {
+      <div class="channel-group">
+        <span class="channel-group-label">Text Channels</span>
+        @for (channel of textChannels(); track channel.id) {
+          <a
+            [routerLink]="['/app', 'guild', selectedGuild()?.id, 'channel', channel.id]"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="channel-item"
+            (click)="state.setChannel({ id: channel.id, name: channel.name, type: 'text' })"
+          >
+            <span class="channel-icon">#</span>
+            <span class="channel-name">{{ channel.name }}</span>
+          </a>
+        }
+      </div>
+    }
+    @if (voiceChannels().length > 0) {
+      <div class="channel-group">
+        <span class="channel-group-label">Voice Channels</span>
+        @for (channel of voiceChannels(); track channel.id) {
+          <button
+            type="button"
+            class="channel-item channel-item-voice"
+            [class.active]="voiceRoom.isInVoiceChannel() && voiceRoom.currentChannelId() === channel.id"
+            [disabled]="joiningVoice"
+            (click)="onVoiceChannelClick(channel.id)"
+          >
+            <span class="channel-icon">&#128266;</span>
+            <span class="channel-name">{{ channel.name }}</span>
+            @if (voiceRoom.isInVoiceChannel() && voiceRoom.currentChannelId() === channel.id) {
+              <span class="channel-voice-status">● Connected</span>
+            }
+          </button>
+        }
+      </div>
+    }
+    @if (selectedGuild() && textChannels().length === 0 && voiceChannels().length === 0) {
+      <p class="channel-empty">No channels yet</p>
+    }
+    @if (voiceError) {
+      <p class="channel-voice-error">{{ voiceError }}</p>
+    }
+  </nav>
+</div>

@@ -1,16 +1,67 @@
-<div class="main-layout">
-  <!-- Guild list sidebar (left) -->
+<div class="main-layout" [class.voice-active]="voiceRoom.isInVoiceChannel()">
+  <!-- Server list sidebar (left) -->
   <aside class="guild-sidebar">
-    <app-guild-sidebar />
+    <app-server-sidebar />
   </aside>
 
-  <!-- Channel list sidebar -->
+  <!-- Channel list sidebar (includes header with theme settings and create invite) -->
   <aside class="channel-sidebar">
-    <app-channel-sidebar />
+    <app-channel-list
+      (openThemeSettings)="openThemeModal()"
+      (openCreateInvite)="openInviteModal()"
+    />
+    @if (voiceRoom.isInVoiceChannel()) {
+      <app-voice-channel-panel [channelName]="currentVoiceChannelName()" />
+    }
   </aside>
 
   <!-- Main chat area -->
   <main class="chat-area">
     <router-outlet />
   </main>
+
+  <!-- Voice controls bar (Mute / Deafen) when in voice channel -->
+  @if (voiceRoom.isInVoiceChannel()) {
+    <div class="voice-controls-bar">
+      <button
+        type="button"
+        class="voice-control-btn"
+        [class.voice-control-active]="voiceRoom.isMuted()"
+        (click)="voiceRoom.toggleMute()"
+        [attr.aria-pressed]="voiceRoom.isMuted()"
+        title="Mute Microphone"
+        aria-label="Mute Microphone"
+      >
+        <span class="voice-control-icon" aria-hidden="true">
+          {{ voiceRoom.isMuted() ? '&#128263;' : '&#128264;' }}
+        </span>
+        <span class="voice-control-label">{{ voiceRoom.isMuted() ? 'Unmute' : 'Mute' }}</span>
+      </button>
+      <button
+        type="button"
+        class="voice-control-btn"
+        [class.voice-control-active]="voiceRoom.isDeafened()"
+        (click)="voiceRoom.toggleDeafen()"
+        [attr.aria-pressed]="voiceRoom.isDeafened()"
+        title="Deafen Audio"
+        aria-label="Deafen Audio"
+      >
+        <span class="voice-control-icon" aria-hidden="true">&#127911;</span>
+        <span class="voice-control-label">{{ voiceRoom.isDeafened() ? 'Undeafen' : 'Deafen' }}</span>
+      </button>
+    </div>
+  }
+
+  <!-- Theme Settings modal -->
+  @if (showThemeModal()) {
+    <app-theme-settings-modal (close)="closeThemeModal()" />
+  }
+
+  <!-- Create Invite modal -->
+  @if (showInviteModal() && selectedGuildId()) {
+    <app-create-invite-modal
+      [guildId]="selectedGuildId()!"
+      (close)="closeInviteModal()"
+    />
+  }
 </div>

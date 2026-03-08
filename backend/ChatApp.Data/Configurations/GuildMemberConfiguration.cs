@@ -19,5 +19,7 @@ public class GuildMemberConfiguration : IEntityTypeConfiguration<GuildMember>
             .WithMany(u => u.GuildMemberships)
             .HasForeignKey(gm => gm.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Many-to-many with Role is configured in RoleConfiguration
     }
 }

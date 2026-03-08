@@ -15,6 +15,8 @@ public class ChatDbContext : DbContext
     public DbSet<Channel> Channels => Set<Channel>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<GuildMember> GuildMembers => Set<GuildMember>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Invite> Invites => Set<Invite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

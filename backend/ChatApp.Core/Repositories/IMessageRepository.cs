@@ -12,4 +12,5 @@ public record ChannelMessageDto(
     string AuthorUsername,
     string Content,
     DateTime CreatedAt,
-    DateTime? EditedAt);
+    DateTime? EditedAt,
+    string? AttachmentUrl);

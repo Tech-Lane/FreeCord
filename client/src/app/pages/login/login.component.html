@@ -3,12 +3,17 @@
     <h1 class="login-title">Welcome to FreeCord</h1>
     <p class="login-subtitle">A decentralized, self-hosted chat platform</p>
 
-    <form class="login-form" (ngSubmit)="isLoading = true">
+    <form class="login-form" (ngSubmit)="onSubmit()">
+      @if (error) {
+        <p class="login-error">{{ error }}</p>
+      }
       <div class="form-group">
         <label for="email">Email</label>
         <input
           id="email"
           type="email"
+          [(ngModel)]="email"
+          name="email"
           placeholder="you&#64;example.com"
           class="form-input"
           autocomplete="email"
@@ -19,6 +24,8 @@
         <input
           id="password"
           type="password"
+          [(ngModel)]="password"
+          name="password"
           placeholder="••••••••"
           class="form-input"
           autocomplete="current-password"

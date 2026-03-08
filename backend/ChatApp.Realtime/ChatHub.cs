@@ -9,6 +9,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Realtime;
 
+/// <summary>
+/// DTO for deserializing DTLS parameters from the client.
+/// </summary>
+internal record DtlsParametersPayload(string? Role, List<DtlsFingerprintPayload>? Fingerprints);
+
+/// <summary>
+/// DTO for deserializing DTLS fingerprint from the client.
+/// </summary>
+internal record DtlsFingerprintPayload(string? Algorithm, string? Value);
+
 [Authorize]
 public class ChatHub : Hub
 {
@@ -16,17 +26,20 @@ public class ChatHub : Hub
     private readonly IPresenceService _presenceService;
     private readonly IMessageRepository _messageRepository;
     private readonly IVoiceCoordinationService _voiceCoordinationService;
+    private readonly VoiceChannelState _voiceState;
 
     public ChatHub(
         ChatDbContext dbContext,
         IPresenceService presenceService,
         IMessageRepository messageRepository,
-        IVoiceCoordinationService voiceCoordinationService)
+        IVoiceCoordinationService voiceCoordinationService,
+        VoiceChannelState voiceState)
     {
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _presenceService = presenceService ?? throw new ArgumentNullException(nameof(presenceService));
         _messageRepository = messageRepository ?? throw new ArgumentNullException(nameof(messageRepository));
         _voiceCoordinationService = voiceCoordinationService ?? throw new ArgumentNullException(nameof(voiceCoordinationService));
+        _voiceState = voiceState ?? throw new ArgumentNullException(nameof(voiceState));
     }
 
     public override async Task OnConnectedAsync()
@@ -46,6 +59,26 @@ public class ChatHub : Hub
         {
             await _presenceService.SetOfflineAsync(userId.Value);
         }
+
+        // Remove from voice channel if currently in one
+        var room = _voiceState.GetRoomForConnection(Context.ConnectionId);
+        if (room.HasValue)
+        {
+            var removed = _voiceState.RemoveByConnection(Context.ConnectionId);
+            if (removed != null)
+            {
+                await Clients.Group(GetGroupName(Guid.Parse(room.Value.GuildId)))
+                    .SendAsync("VoiceParticipantLeft", new
+                    {
+                        GuildId = room.Value.GuildId,
+                        ChannelId = room.Value.ChannelId,
+                        UserId = removed.UserId,
+                        ConnectionId = removed.ConnectionId,
+                        Username = removed.Username
+                    });
+            }
+        }
+
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -85,8 +118,9 @@ public class ChatHub : Hub
 
     /// <summary>
     /// Sends a message to a channel within a guild. Persists the message and broadcasts to the guild group.
+    /// Content or attachmentUrl (or both) must be provided. attachmentUrl is a relative URL from media upload (e.g. /uploads/xyz.png).
     /// </summary>
-    public async Task SendMessage(string guildId, string channelId, string content)
+    public async Task SendMessage(string guildId, string channelId, string content, string? attachmentUrl = null)
     {
         var userId = GetUserId();
         if (!userId.HasValue) return;
@@ -96,9 +130,11 @@ public class ChatHub : Hub
             throw new HubException("Invalid guild or channel ID.");
         }
 
-        if (string.IsNullOrWhiteSpace(content))
+        var hasContent = !string.IsNullOrWhiteSpace(content);
+        var hasAttachment = !string.IsNullOrWhiteSpace(attachmentUrl);
+        if (!hasContent && !hasAttachment)
         {
-            throw new HubException("Message content cannot be empty.");
+            throw new HubException("Message must have content or an attachment.");
         }
 
         var channel = await _dbContext.Channels
@@ -120,7 +156,8 @@ public class ChatHub : Hub
             Id = Guid.NewGuid(),
             ChannelId = channelGuid,
             AuthorId = userId.Value,
-            Content = content.Trim(),
+            Content = hasContent ? content!.Trim() : string.Empty,
+            AttachmentUrl = hasAttachment ? attachmentUrl!.Trim() : null,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -141,7 +178,8 @@ public class ChatHub : Hub
                 AuthorUsername = author,
                 message.Content,
                 message.CreatedAt,
-                message.EditedAt
+                message.EditedAt,
+                message.AttachmentUrl
             });
     }
 
@@ -175,6 +213,23 @@ public class ChatHub : Hub
                 ChannelId = channelGuid,
                 IsTyping = isTyping
             });
+    }
+
+    /// <summary>
+    /// Returns the router RTP capabilities needed for mediasoup-client Device.load().
+    /// Call this before CreateWebRtcTransport when joining a voice channel.
+    /// </summary>
+    /// <returns>Router RTP capabilities as JSON object.</returns>
+    public async Task<object> GetRouterRtpCapabilities()
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue)
+        {
+            throw new HubException("Unauthorized.");
+        }
+
+        var json = await _voiceCoordinationService.GetRouterRtpCapabilitiesAsync(Context.ConnectionAborted);
+        return System.Text.Json.JsonSerializer.Deserialize<object>(json) ?? new { };
     }
 
     /// <summary>
@@ -221,6 +276,23 @@ public class ChatHub : Hub
             appData: channelId,
             cancellationToken: Context.ConnectionAborted);
 
+        // Track participant in voice channel and broadcast to guild
+        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
+        var participant = _voiceState.AddParticipant(guildId, channelId, userId.Value, Context.ConnectionId, username);
+
+        await Clients.Group(GetGroupName(guildGuid))
+            .SendAsync("VoiceParticipantJoined", new
+            {
+                GuildId = guildId,
+                ChannelId = channelId,
+                UserId = participant.UserId,
+                ConnectionId = participant.ConnectionId,
+                Username = participant.Username,
+                IsMuted = participant.IsMuted,
+                IsDeafened = participant.IsDeafened,
+                IsSpeaking = participant.IsSpeaking
+            });
+
         return new
         {
             transportId = details.TransportId,
@@ -228,6 +300,180 @@ public class ChatHub : Hub
             iceCandidates = details.IceCandidates.Select(c => new { c.Foundation, c.Priority, c.Ip, c.Port, c.Type, c.Protocol, c.Address, c.TcpType }),
             dtlsParameters = new { details.DtlsParameters.Role, fingerprints = details.DtlsParameters.Fingerprints.Select(f => new { f.Algorithm, f.Value }) }
         };
+    }
+
+    /// <summary>
+    /// Leaves a voice channel. Call when the client explicitly disconnects from voice.
+    /// Removes the participant and broadcasts VoiceParticipantLeft to the guild.
+    /// </summary>
+    public async Task LeaveVoiceChannel(string guildId, string channelId)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue) return;
+
+        var removed = _voiceState.RemoveByConnection(Context.ConnectionId);
+        if (removed != null && Guid.TryParse(guildId, out var guildGuid))
+        {
+            await Clients.Group(GetGroupName(guildGuid))
+                .SendAsync("VoiceParticipantLeft", new
+                {
+                    GuildId = guildId,
+                    ChannelId = channelId,
+                    UserId = removed.UserId,
+                    ConnectionId = removed.ConnectionId,
+                    Username = removed.Username
+                });
+        }
+    }
+
+    /// <summary>
+    /// Updates the current user's mute state in the voice channel.
+    /// Broadcasts VoiceParticipantUpdated so other clients can show a muted icon.
+    /// </summary>
+    public async Task SetVoiceMute(string guildId, string channelId, bool isMuted)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue) return;
+
+        var updated = _voiceState.UpdateMute(guildId, channelId, Context.ConnectionId, isMuted);
+        if (updated != null && Guid.TryParse(guildId, out var guildGuid))
+        {
+            await Clients.Group(GetGroupName(guildGuid))
+                .SendAsync("VoiceParticipantUpdated", new
+                {
+                    GuildId = guildId,
+                    ChannelId = channelId,
+                    UserId = updated.UserId,
+                    ConnectionId = updated.ConnectionId,
+                    Username = updated.Username,
+                    IsMuted = updated.IsMuted,
+                    IsDeafened = updated.IsDeafened,
+                    IsSpeaking = updated.IsSpeaking
+                });
+        }
+    }
+
+    /// <summary>
+    /// Updates the current user's deafen state in the voice channel.
+    /// Broadcasts VoiceParticipantUpdated for UI consistency.
+    /// </summary>
+    public async Task SetVoiceDeafen(string guildId, string channelId, bool isDeafened)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue) return;
+
+        var updated = _voiceState.UpdateDeafen(guildId, channelId, Context.ConnectionId, isDeafened);
+        if (updated != null && Guid.TryParse(guildId, out var guildGuid))
+        {
+            await Clients.Group(GetGroupName(guildGuid))
+                .SendAsync("VoiceParticipantUpdated", new
+                {
+                    GuildId = guildId,
+                    ChannelId = channelId,
+                    UserId = updated.UserId,
+                    ConnectionId = updated.ConnectionId,
+                    Username = updated.Username,
+                    IsMuted = updated.IsMuted,
+                    IsDeafened = updated.IsDeafened,
+                    IsSpeaking = updated.IsSpeaking
+                });
+        }
+    }
+
+    /// <summary>
+    /// Updates the current user's speaking state (from local audio level analysis).
+    /// Broadcasts VoiceParticipantUpdated so other clients can highlight the active speaker.
+    /// </summary>
+    public async Task SetVoiceSpeaking(string guildId, string channelId, bool isSpeaking)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue) return;
+
+        var updated = _voiceState.UpdateSpeaking(guildId, channelId, Context.ConnectionId, isSpeaking);
+        if (updated != null && Guid.TryParse(guildId, out var guildGuid))
+        {
+            await Clients.Group(GetGroupName(guildGuid))
+                .SendAsync("VoiceParticipantUpdated", new
+                {
+                    GuildId = guildId,
+                    ChannelId = channelId,
+                    UserId = updated.UserId,
+                    ConnectionId = updated.ConnectionId,
+                    Username = updated.Username,
+                    IsMuted = updated.IsMuted,
+                    IsDeafened = updated.IsDeafened,
+                    IsSpeaking = updated.IsSpeaking
+                });
+        }
+    }
+
+    /// <summary>
+    /// Returns the list of participants in a voice channel.
+    /// Call when joining or when displaying the voice channel UI.
+    /// </summary>
+    public Task<IReadOnlyList<object>> GetVoiceParticipants(string guildId, string channelId)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue) return Task.FromResult<IReadOnlyList<object>>(Array.Empty<object>());
+
+        var participants = _voiceState.GetParticipants(guildId, channelId);
+        var dtos = participants.Select(p => (object)new
+        {
+            p.UserId,
+            p.ConnectionId,
+            p.Username,
+            p.IsMuted,
+            p.IsDeafened,
+            p.IsSpeaking
+        }).ToList();
+        return Task.FromResult<IReadOnlyList<object>>(dtos);
+    }
+
+    /// <summary>
+    /// Completes the WebRTC transport handshake with client DTLS parameters.
+    /// Call when mediasoup-client send transport emits the "connect" event.
+    /// </summary>
+    /// <param name="transportId">The transport ID from JoinVoiceChannel.</param>
+    /// <param name="dtlsParameters">Client DTLS parameters (role, fingerprints).</param>
+    public async Task ConnectTransport(string transportId, object dtlsParameters)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue)
+        {
+            throw new HubException("Unauthorized.");
+        }
+
+        var dp = System.Text.Json.JsonSerializer.Deserialize<DtlsParametersPayload>(System.Text.Json.JsonSerializer.Serialize(dtlsParameters));
+        if (dp == null || dp.Fingerprints == null)
+        {
+            throw new HubException("Invalid DTLS parameters.");
+        }
+
+        var coreDtls = new ChatApp.Core.Services.DtlsParameters(
+            dp.Role ?? "client",
+            dp.Fingerprints.Select(f => new ChatApp.Core.Services.DtlsFingerprint(f.Algorithm ?? "", f.Value ?? "")).ToList());
+
+        await _voiceCoordinationService.ConnectTransportAsync(transportId, coreDtls, Context.ConnectionAborted);
+    }
+
+    /// <summary>
+    /// Creates an audio/video producer on a transport.
+    /// Call when mediasoup-client send transport emits the "produce" event.
+    /// </summary>
+    /// <param name="transportId">The transport ID.</param>
+    /// <param name="kind">Media kind ("audio" or "video").</param>
+    /// <param name="rtpParameters">RTP parameters from the produce event (will be serialized to JSON).</param>
+    /// <returns>The producer ID to pass back to the produce callback.</returns>
+    public async Task<string> CreateProducer(string transportId, string kind, object rtpParameters)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue)
+        {
+            throw new HubException("Unauthorized.");
+        }
+
+        var json = System.Text.Json.JsonSerializer.Serialize(rtpParameters);
+        return await _voiceCoordinationService.ProduceAsync(transportId, kind, json, Context.ConnectionAborted);
     }
 
     /// <summary>
@@ -266,7 +512,8 @@ public class ChatHub : Hub
             m.AuthorUsername,
             m.Content,
             m.CreatedAt,
-            m.EditedAt
+            m.EditedAt,
+            m.AttachmentUrl
         }).ToList<object>();
     }
 

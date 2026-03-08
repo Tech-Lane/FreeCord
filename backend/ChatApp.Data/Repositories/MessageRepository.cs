@@ -24,7 +24,7 @@ public class MessageRepository : IMessageRepository
 
         const string sql = """
             SELECT m."Id", m."ChannelId", m."AuthorId", u."Username" AS AuthorUsername,
-                   m."Content", m."CreatedAt", m."EditedAt"
+                   m."Content", m."CreatedAt", m."EditedAt", m."AttachmentUrl"
             FROM "Messages" m
             INNER JOIN "Users" u ON m."AuthorId" = u."Id"
             WHERE m."ChannelId" = @ChannelId

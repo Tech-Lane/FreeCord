@@ -4,9 +4,43 @@ package freecord.voice;
 
 // VoiceService provides WebRTC transport creation for voice channels.
 service VoiceService {
+  // GetRouterRtpCapabilities returns the router RTP capabilities needed for mediasoup-client Device.load().
+  rpc GetRouterRtpCapabilities(GetRouterRtpCapabilitiesRequest) returns (GetRouterRtpCapabilitiesResponse);
+
   // CreateWebRtcTransport creates a new WebRTC transport on the mediasoup worker
   // and returns the transport parameters needed for client connection.
   rpc CreateWebRtcTransport(CreateWebRtcTransportRequest) returns (CreateWebRtcTransportResponse);
+
+  // ConnectTransport completes the WebRTC transport handshake with client DTLS parameters.
+  rpc ConnectTransport(ConnectTransportRequest) returns (ConnectTransportResponse);
+
+  // Produce creates an audio/video producer on a transport. Returns the producer ID for mediasoup-client.
+  rpc Produce(ProduceRequest) returns (ProduceResponse);
+}
+
+message GetRouterRtpCapabilitiesRequest {}
+
+message GetRouterRtpCapabilitiesResponse {
+  // Router RTP capabilities as JSON (mediasoup RtpCapabilities format).
+  string router_rtp_capabilities_json = 1;
+}
+
+message ConnectTransportRequest {
+  string transport_id = 1;
+  DtlsParameters dtls_parameters = 2;
+}
+
+message ConnectTransportResponse {}
+
+message ProduceRequest {
+  string transport_id = 1;
+  string kind = 2;  // "audio" or "video"
+  // RTP parameters as JSON (mediasoup RtpParameters format).
+  string rtp_parameters_json = 3;
+}
+
+message ProduceResponse {
+  string producer_id = 1;
 }
 
 message CreateWebRtcTransportRequest {

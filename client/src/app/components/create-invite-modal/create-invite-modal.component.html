@@ -1,0 +1,54 @@
+<!--
+  Create Invite Modal
+  - Creates an invite via POST /api/guilds/{guildId}/invites
+  - Displays shortlink (nexchat://invite/code) and copies to clipboard
+-->
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-content" role="dialog" aria-labelledby="invite-modal-title">
+    <header class="modal-header">
+      <h2 id="invite-modal-title">Invite People</h2>
+      <button type="button" class="modal-close" (click)="cancel()" aria-label="Close">
+        &times;
+      </button>
+    </header>
+
+    <div class="modal-body">
+      @if (shortlink()) {
+        <p class="invite-desc">Share this link to invite people to your server:</p>
+        <div class="invite-link-row">
+          <code class="invite-link">{{ shortlink() }}</code>
+          <button
+            type="button"
+            class="btn-copy"
+            (click)="copyToClipboard()"
+            [attr.aria-label]="copied() ? 'Copied' : 'Copy to clipboard'"
+          >
+            {{ copied() ? 'Copied!' : 'Copy' }}
+          </button>
+        </div>
+      } @else {
+        <p class="invite-desc">Generate a unique invite link that others can use to join this server.</p>
+      }
+
+      @if (error()) {
+        <p class="invite-error">{{ error() }}</p>
+      }
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        {{ shortlink() ? 'Done' : 'Cancel' }}
+      </button>
+      @if (!shortlink()) {
+        <button
+          type="button"
+          class="btn-create"
+          (click)="createAndCopy()"
+          [disabled]="creating"
+        >
+          {{ creating ? 'Creating…' : 'Create Invite' }}
+        </button>
+      }
+    </footer>
+  </div>
+</div>

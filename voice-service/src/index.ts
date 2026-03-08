@@ -23,6 +23,9 @@ let worker: mediasoup.types.Worker | null = null;
 let router: mediasoup.types.Router | null = null;
 let webRtcServer: mediasoup.types.WebRtcServer | null = null;
 
+/** Active WebRTC transports by ID for connect/produce handlers. */
+const transports = new Map<string, mediasoup.types.WebRtcTransport>();
+
 /**
  * Initialize Mediasoup C++ worker with standard WebRTC configurations.
  */
@@ -138,6 +141,31 @@ async function startGrpcServer(): Promise<void> {
   server.addService(
     voiceService,
     {
+    GetRouterRtpCapabilities: async (
+      _call: grpc.ServerUnaryCall<object, { router_rtp_capabilities_json: string }>,
+      callback: grpc.sendUnaryData<{ router_rtp_capabilities_json: string }>
+    ) => {
+      try {
+        if (!router) {
+          callback(
+            { code: grpc.status.UNAVAILABLE, message: "Mediasoup not initialized" },
+            null
+          );
+          return;
+        }
+        const caps = JSON.stringify(router.rtpCapabilities);
+        callback(null, { router_rtp_capabilities_json: caps });
+      } catch (err) {
+        console.error("[gRPC] GetRouterRtpCapabilities error:", err);
+        callback(
+          {
+            code: grpc.status.INTERNAL,
+            message: err instanceof Error ? err.message : "Unknown error",
+          },
+          null
+        );
+      }
+    },
     CreateWebRtcTransport: async (
       call: grpc.ServerUnaryCall<
         { app_data?: string },
@@ -177,6 +205,10 @@ async function startGrpcServer(): Promise<void> {
             : undefined,
         });
 
+        // Store transport for connect/produce RPCs
+        transports.set(transport.id, transport);
+        transport.on("routerclose", () => transports.delete(transport.id));
+
         const response = mapTransportToResponse(transport);
         callback(null, response);
       } catch (err) {
@@ -189,7 +221,77 @@ async function startGrpcServer(): Promise<void> {
           null
         );
       }
-    }
+    },
+    ConnectTransport: async (
+      call: grpc.ServerUnaryCall<
+        { transport_id: string; dtls_parameters: { role: string; fingerprints: Array<{ algorithm: string; value: string }> } },
+        object
+      >,
+      callback: grpc.sendUnaryData<object>
+    ) => {
+      try {
+        const transport = transports.get(call.request.transport_id);
+        if (!transport) {
+          callback(
+            { code: grpc.status.NOT_FOUND, message: "Transport not found" },
+            null
+          );
+          return;
+        }
+        const dp = call.request.dtls_parameters;
+        const dtlsParameters: mediasoup.types.DtlsParameters = {
+          role: dp.role as mediasoup.types.DtlsRole,
+          fingerprints: dp.fingerprints.map((f) => ({
+            algorithm: f.algorithm as mediasoup.types.FingerprintAlgorithm,
+            value: f.value,
+          })),
+        };
+        await transport.connect({ dtlsParameters });
+        callback(null, {});
+      } catch (err) {
+        console.error("[gRPC] ConnectTransport error:", err);
+        callback(
+          {
+            code: grpc.status.INTERNAL,
+            message: err instanceof Error ? err.message : "Unknown error",
+          },
+          null
+        );
+      }
+    },
+    Produce: async (
+      call: grpc.ServerUnaryCall<
+        { transport_id: string; kind: string; rtp_parameters_json: string },
+        { producer_id: string }
+      >,
+      callback: grpc.sendUnaryData<{ producer_id: string }>
+    ) => {
+      try {
+        const transport = transports.get(call.request.transport_id);
+        if (!transport) {
+          callback(
+            { code: grpc.status.NOT_FOUND, message: "Transport not found" },
+            null
+          );
+          return;
+        }
+        const rtpParameters = JSON.parse(call.request.rtp_parameters_json) as mediasoup.types.RtpParameters;
+        const producer = await transport.produce({
+          kind: call.request.kind as mediasoup.types.MediaKind,
+          rtpParameters,
+        });
+        callback(null, { producer_id: producer.id });
+      } catch (err) {
+        console.error("[gRPC] Produce error:", err);
+        callback(
+          {
+            code: grpc.status.INTERNAL,
+            message: err instanceof Error ? err.message : "Unknown error",
+          },
+          null
+        );
+      }
+    },
   });
 
   await new Promise<void>((resolve, reject) => {

@@ -15,3 +15,4 @@ c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Realtime\obj\Debug\net8
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Realtime\obj\Debug\net8.0\ref\ChatApp.Realtime.dll
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Realtime\bin\Debug\net8.0\ChatApp.Data.dll
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Realtime\bin\Debug\net8.0\ChatApp.Data.pdb
+C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Realtime\obj\Debug\net8.0\ChatApp.Realtime.sourcelink.json

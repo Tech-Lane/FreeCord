@@ -95,11 +95,50 @@ namespace ChatApp.Data.Migrations
                     b.ToTable("GuildMembers");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Entities.Invite", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("MaxUses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Uses")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Code");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("Invites");
+                });
+
             modelBuilder.Entity("ChatApp.Core.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("AttachmentUrl")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
@@ -124,6 +163,32 @@ namespace ChatApp.Data.Migrations
                     b.HasIndex("ChannelId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("ChatApp.Core.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Color")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("PermissionsBitfield")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("ChatApp.Core.Entities.User", b =>
@@ -162,6 +227,24 @@ namespace ChatApp.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("GuildMemberRole", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RoleId", "GuildId", "UserId");
+
+                    b.HasIndex("GuildId", "UserId");
+
+                    b.ToTable("GuildMemberRoles", (string)null);
                 });
 
             modelBuilder.Entity("ChatApp.Core.Entities.Channel", b =>
@@ -205,6 +288,25 @@ namespace ChatApp.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Entities.Invite", b =>
+                {
+                    b.HasOne("ChatApp.Core.Entities.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Core.Entities.Guild", "Guild")
+                        .WithMany("Invites")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("ChatApp.Core.Entities.Message", b =>
                 {
                     b.HasOne("ChatApp.Core.Entities.User", "Author")
@@ -224,6 +326,32 @@ namespace ChatApp.Data.Migrations
                     b.Navigation("Channel");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Entities.Role", b =>
+                {
+                    b.HasOne("ChatApp.Core.Entities.Guild", "Guild")
+                        .WithMany("Roles")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("GuildMemberRole", b =>
+                {
+                    b.HasOne("ChatApp.Core.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Core.Entities.GuildMember", null)
+                        .WithMany()
+                        .HasForeignKey("GuildId", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ChatApp.Core.Entities.Channel", b =>
                 {
                     b.Navigation("Messages");
@@ -233,7 +361,11 @@ namespace ChatApp.Data.Migrations
                 {
                     b.Navigation("Channels");
 
+                    b.Navigation("Invites");
+
                     b.Navigation("Members");
+
+                    b.Navigation("Roles");
                 });
 
             modelBuilder.Entity("ChatApp.Core.Entities.User", b =>

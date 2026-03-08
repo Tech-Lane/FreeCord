@@ -49,9 +49,29 @@ namespace ChatApp.Infra.Voice {
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest> __Marshaller_freecord_voice_GetRouterRtpCapabilitiesRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse> __Marshaller_freecord_voice_GetRouterRtpCapabilitiesResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.CreateWebRtcTransportRequest> __Marshaller_freecord_voice_CreateWebRtcTransportRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.CreateWebRtcTransportRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.CreateWebRtcTransportResponse> __Marshaller_freecord_voice_CreateWebRtcTransportResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.CreateWebRtcTransportResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.ConnectTransportRequest> __Marshaller_freecord_voice_ConnectTransportRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.ConnectTransportRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.ConnectTransportResponse> __Marshaller_freecord_voice_ConnectTransportResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.ConnectTransportResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.ProduceRequest> __Marshaller_freecord_voice_ProduceRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.ProduceRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::ChatApp.Infra.Voice.ProduceResponse> __Marshaller_freecord_voice_ProduceResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::ChatApp.Infra.Voice.ProduceResponse.Parser));
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest, global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse> __Method_GetRouterRtpCapabilities = new grpc::Method<global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest, global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetRouterRtpCapabilities",
+        __Marshaller_freecord_voice_GetRouterRtpCapabilitiesRequest,
+        __Marshaller_freecord_voice_GetRouterRtpCapabilitiesResponse);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::ChatApp.Infra.Voice.CreateWebRtcTransportRequest, global::ChatApp.Infra.Voice.CreateWebRtcTransportResponse> __Method_CreateWebRtcTransport = new grpc::Method<global::ChatApp.Infra.Voice.CreateWebRtcTransportRequest, global::ChatApp.Infra.Voice.CreateWebRtcTransportResponse>(
@@ -60,6 +80,22 @@ namespace ChatApp.Infra.Voice {
         "CreateWebRtcTransport",
         __Marshaller_freecord_voice_CreateWebRtcTransportRequest,
         __Marshaller_freecord_voice_CreateWebRtcTransportResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::ChatApp.Infra.Voice.ConnectTransportRequest, global::ChatApp.Infra.Voice.ConnectTransportResponse> __Method_ConnectTransport = new grpc::Method<global::ChatApp.Infra.Voice.ConnectTransportRequest, global::ChatApp.Infra.Voice.ConnectTransportResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "ConnectTransport",
+        __Marshaller_freecord_voice_ConnectTransportRequest,
+        __Marshaller_freecord_voice_ConnectTransportResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::ChatApp.Infra.Voice.ProduceRequest, global::ChatApp.Infra.Voice.ProduceResponse> __Method_Produce = new grpc::Method<global::ChatApp.Infra.Voice.ProduceRequest, global::ChatApp.Infra.Voice.ProduceResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "Produce",
+        __Marshaller_freecord_voice_ProduceRequest,
+        __Marshaller_freecord_voice_ProduceResponse);
 
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
@@ -94,6 +130,54 @@ namespace ChatApp.Infra.Voice {
       {
       }
 
+      /// <summary>
+      /// GetRouterRtpCapabilities returns the router RTP capabilities needed for mediasoup-client Device.load().
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse GetRouterRtpCapabilities(global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetRouterRtpCapabilities(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// GetRouterRtpCapabilities returns the router RTP capabilities needed for mediasoup-client Device.load().
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse GetRouterRtpCapabilities(global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_GetRouterRtpCapabilities, null, options, request);
+      }
+      /// <summary>
+      /// GetRouterRtpCapabilities returns the router RTP capabilities needed for mediasoup-client Device.load().
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse> GetRouterRtpCapabilitiesAsync(global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetRouterRtpCapabilitiesAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// GetRouterRtpCapabilities returns the router RTP capabilities needed for mediasoup-client Device.load().
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesResponse> GetRouterRtpCapabilitiesAsync(global::ChatApp.Infra.Voice.GetRouterRtpCapabilitiesRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_GetRouterRtpCapabilities, null, options, request);
+      }
       /// <summary>
       /// CreateWebRtcTransport creates a new WebRTC transport on the mediasoup worker
       /// and returns the transport parameters needed for client connection.
@@ -145,6 +229,102 @@ namespace ChatApp.Infra.Voice {
       public virtual grpc::AsyncUnaryCall<global::ChatApp.Infra.Voice.CreateWebRtcTransportResponse> CreateWebRtcTransportAsync(global::ChatApp.Infra.Voice.CreateWebRtcTransportRequest request, grpc::CallOptions options)
       {
         return CallInvoker.AsyncUnaryCall(__Method_CreateWebRtcTransport, null, options, request);
+      }
+      /// <summary>
+      /// ConnectTransport completes the WebRTC transport handshake with client DTLS parameters.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::ChatApp.Infra.Voice.ConnectTransportResponse ConnectTransport(global::ChatApp.Infra.Voice.ConnectTransportRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return ConnectTransport(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// ConnectTransport completes the WebRTC transport handshake with client DTLS parameters.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::ChatApp.Infra.Voice.ConnectTransportResponse ConnectTransport(global::ChatApp.Infra.Voice.ConnectTransportRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_ConnectTransport, null, options, request);
+      }
+      /// <summary>
+      /// ConnectTransport completes the WebRTC transport handshake with client DTLS parameters.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::ChatApp.Infra.Voice.ConnectTransportResponse> ConnectTransportAsync(global::ChatApp.Infra.Voice.ConnectTransportRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return ConnectTransportAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// ConnectTransport completes the WebRTC transport handshake with client DTLS parameters.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::ChatApp.Infra.Voice.ConnectTransportResponse> ConnectTransportAsync(global::ChatApp.Infra.Voice.ConnectTransportRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_ConnectTransport, null, options, request);
+      }
+      /// <summary>
+      /// Produce creates an audio/video producer on a transport. Returns the producer ID for mediasoup-client.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::ChatApp.Infra.Voice.ProduceResponse Produce(global::ChatApp.Infra.Voice.ProduceRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return Produce(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Produce creates an audio/video producer on a transport. Returns the producer ID for mediasoup-client.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::ChatApp.Infra.Voice.ProduceResponse Produce(global::ChatApp.Infra.Voice.ProduceRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_Produce, null, options, request);
+      }
+      /// <summary>
+      /// Produce creates an audio/video producer on a transport. Returns the producer ID for mediasoup-client.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::ChatApp.Infra.Voice.ProduceResponse> ProduceAsync(global::ChatApp.Infra.Voice.ProduceRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return ProduceAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Produce creates an audio/video producer on a transport. Returns the producer ID for mediasoup-client.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::ChatApp.Infra.Voice.ProduceResponse> ProduceAsync(global::ChatApp.Infra.Voice.ProduceRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_Produce, null, options, request);
       }
       /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]

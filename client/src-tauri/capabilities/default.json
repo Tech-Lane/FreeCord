@@ -1,11 +1,41 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "enables the default permissions",
+  "description": "Default permissions with strictly scoped plugin directory access",
   "windows": [
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "core:event:default",
+    "deep-link:default",
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        { "path": "$HOME/.freecord/plugins" },
+        { "path": "$HOME/.freecord/plugins/**/*" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [
+        { "path": "$HOME/.freecord/plugins" },
+        { "path": "$HOME/.freecord/plugins/**/*" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        { "path": "$HOME/.freecord/plugins" },
+        { "path": "$HOME/.freecord/plugins/**/*" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        { "path": "$HOME/.freecord/plugins" },
+        { "path": "$HOME/.freecord/plugins/**/*" }
+      ]
+    }
   ]
 }

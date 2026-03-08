@@ -1,6 +1,7 @@
 using System.Text;
 using ChatApp.Api;
 using ChatApp.Data;
+using ChatApp.Data.Permissions;
 using ChatApp.Core.Repositories;
 using ChatApp.Data.Repositories;
 using ChatApp.Infra.Redis;
@@ -29,7 +30,11 @@ builder.Services.AddVoiceCoordination(builder.Configuration);
 // Repositories
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
-// SignalR
+// Permission service (role-based guild permissions)
+builder.Services.AddScoped<ChatApp.Core.Services.IPermissionService, PermissionService>();
+
+// SignalR (VoiceChannelState is singleton for in-memory voice participant tracking)
+builder.Services.AddSingleton<ChatApp.Realtime.VoiceChannelState>();
 builder.Services.AddSignalR();
 
 // JWT Authentication
@@ -84,8 +89,29 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Serve uploaded files from /uploads (e.g. /uploads/xyz.png for chat attachments)
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
+if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
+
 // Auth endpoints
 app.MapAuthEndpoints();
+
+// Guild, channel, and message REST endpoints
+app.MapGuildEndpoints();
+
+// User profile and theme endpoints
+app.MapUserEndpoints();
+
+// Invite endpoints (create invite, join via invite)
+app.MapInviteEndpoints();
+
+// Media upload endpoints (chat attachments)
+app.MapMediaEndpoints();
 
 // SignalR hub
 app.MapHub<ChatHub>("/hubs/chat");

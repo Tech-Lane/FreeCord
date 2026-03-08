@@ -1,0 +1,83 @@
+<div class="chat-area-container">
+  <header class="chat-area-header">
+    <span class="chat-channel-icon">#</span>
+    <h1 class="chat-channel-name">{{ channelName() }}</h1>
+  </header>
+
+  <div class="message-list">
+    @if (loading()) {
+      <div class="message-loading">Loading messages…</div>
+    } @else {
+      @for (msg of messages(); track msg.id) {
+        <div class="message">
+          <span class="message-author">{{ msg.authorUsername }}</span>
+          @if (msg.attachmentUrl) {
+            <div class="message-attachment">
+              @if (isImageAttachment(msg.attachmentUrl)) {
+                <img
+                  [src]="getAttachmentFullUrl(msg.attachmentUrl)"
+                  [alt]="msg.content || 'Attachment'"
+                  class="message-attachment-img"
+                />
+              } @else {
+                <a
+                  [href]="getAttachmentFullUrl(msg.attachmentUrl)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="message-attachment-link"
+                  >Download attachment</a
+                >
+              }
+            </div>
+          }
+          @if (msg.content) {
+            <span class="message-content">{{ msg | formatMessageContent | async }}</span>
+          }
+          <span class="message-time">{{ msg.createdAt | date : 'short' }}</span>
+        </div>
+      } @empty {
+        <div class="message-empty">No messages yet. Start the conversation!</div>
+      }
+    }
+  </div>
+
+  <div class="chat-input-area">
+    <input
+      id="chat-attachment-input"
+      type="file"
+      accept="image/*,.pdf,.txt,.md,.doc,.docx,.xls,.xlsx,.zip,.tar,.gz,.7z,.json,.xml,.csv"
+      class="chat-attachment-input-hidden"
+      (change)="onFileSelected($event)"
+    />
+    <form (ngSubmit)="sendMessage()" class="chat-input-form">
+      @if (pendingAttachmentUrl) {
+        <span class="chat-pending-attachment">
+          Attachment ready
+          <button type="button" class="chat-clear-attachment" (click)="clearPendingAttachment()">
+            &times;
+          </button>
+        </span>
+      }
+      <div class="chat-input-row">
+        <button type="button" class="chat-attachment-btn" (click)="triggerFileInput()" [disabled]="uploading()">
+          +
+        </button>
+        <input
+          type="text"
+          [(ngModel)]="messageDraft"
+          name="messageDraft"
+          placeholder="Type a message..."
+          class="chat-input"
+          (keydown)="onKeyDown($event)"
+        />
+        <button
+          type="submit"
+          class="chat-send-btn"
+          [disabled]="!((messageDraft || '').trim() || pendingAttachmentUrl) || uploading()"
+        >
+          Send
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

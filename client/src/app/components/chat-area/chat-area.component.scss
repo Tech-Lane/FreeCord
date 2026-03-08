@@ -1,0 +1,214 @@
+/**
+ * Chat area styles. Message list and send input.
+ * Uses CSS variables for theming.
+ */
+.chat-area-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-area-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+}
+
+.chat-channel-icon {
+  color: var(--text-muted);
+  font-size: var(--text-xl);
+}
+
+.chat-channel-name {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-main);
+}
+
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.message {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  align-items: baseline;
+}
+
+.message-author {
+  font-weight: var(--font-semibold);
+  color: var(--accent-color);
+  font-size: var(--text-sm);
+}
+
+.message-content {
+  color: var(--text-main);
+  font-size: var(--text-base);
+}
+
+.message-time {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.message-attachment {
+  width: 100%;
+  margin-top: var(--spacing-xs);
+}
+
+.message-attachment-img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  display: block;
+}
+
+.message-attachment-link {
+  display: inline-block;
+  color: var(--accent-color);
+  font-size: var(--text-sm);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.message-loading,
+.message-empty {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  padding: var(--spacing-lg);
+}
+
+.chat-input-area {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+}
+
+.chat-attachment-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chat-input-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.chat-pending-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.chat-clear-attachment {
+  padding: 0;
+  margin-left: var(--spacing-xs);
+  font-size: var(--text-base);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+
+  &:hover {
+    color: var(--text-main);
+  }
+}
+
+.chat-input-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.chat-attachment-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xl);
+  font-weight: var(--font-medium);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-normal), color var(--transition-normal);
+
+  &:hover:not(:disabled) {
+    background: var(--bg-primary);
+    color: var(--accent-color);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.chat-input {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--text-base);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-color);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+.chat-send-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  background: var(--accent-color);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-normal);
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

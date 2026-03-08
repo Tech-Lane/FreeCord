@@ -31,4 +31,64 @@
   flex-direction: column;
   min-width: 0;
   background: var(--bg-primary);
+
+  /* Prevent content from being hidden behind voice controls bar */
+  .main-layout.voice-active & {
+    padding-bottom: 56px;
+  }
+}
+
+/* Voice controls bar (Mute / Deafen) - fixed at bottom when in voice channel */
+.voice-controls-bar {
+  position: fixed;
+  bottom: 0;
+  left: var(--guild-sidebar-width);
+  right: 0;
+  margin-left: var(--channel-sidebar-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  z-index: 100;
+}
+
+.voice-control-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  color: var(--text-main);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-default);
+  }
+
+  &.voice-control-active {
+    background: var(--status-busy);
+    border-color: var(--status-busy);
+    color: var(--text-on-accent);
+
+    &:hover {
+      background: #e03c40;
+      border-color: #e03c40;
+    }
+  }
+}
+
+.voice-control-icon {
+  font-size: 1.125rem;
+}
+
+.voice-control-label {
+  font-weight: var(--font-medium);
 }

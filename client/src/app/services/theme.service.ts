@@ -69,9 +69,9 @@ export class ThemeService {
 
   /**
    * Sanitizes CSS to prevent XSS. Removes known dangerous patterns.
-   * Uses allowlist approach: only safe CSS remains.
+   * Public for use by ThemeSettingsModal preview and other safe injection points.
    */
-  private sanitizeCss(css: string): string {
+  sanitizeCss(css: string): string {
     let result = css;
 
     for (const pattern of ThemeService.UNSAFE_PATTERNS) {

@@ -1,0 +1,107 @@
+<!--
+  Theme Settings Modal
+  - Color pickers for core CSS variables
+  - Text area for custom CSS
+  - Live preview area
+  - Save persists to API and applies theme via ThemeService
+-->
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-content" role="dialog" aria-labelledby="theme-modal-title">
+    <header class="modal-header">
+      <h2 id="theme-modal-title">Theme Settings</h2>
+      <button type="button" class="modal-close" (click)="cancel()" aria-label="Close">
+        &times;
+      </button>
+    </header>
+
+    <div class="modal-body">
+      <!-- Color pickers for core CSS variables -->
+      <section class="theme-section">
+        <h3 class="section-title">Colors</h3>
+        <p class="section-desc">Override core CSS variables. Changes preview instantly.</p>
+        <div class="color-grid">
+          @for (key of variableKeys; track key) {
+            <div class="color-row">
+              <label [for]="'color-' + key" class="color-label">
+                {{ variableLabels[key] }}
+              </label>
+              <div class="color-input-wrap">
+                <input
+                  type="color"
+                  [id]="'color-' + key"
+                  [value]="colorValues()[key]"
+                  (input)="onColorChange(key, $any($event.target).value)"
+                  class="color-picker"
+                />
+                <input
+                  type="text"
+                  [value]="colorValues()[key]"
+                  (input)="onColorChange(key, $any($event.target).value)"
+                  class="color-hex"
+                  [attr.aria-label]="variableLabels[key] + ' hex value'"
+                />
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Custom CSS editor -->
+      <section class="theme-section">
+        <h3 class="section-title">Custom CSS</h3>
+        <p class="section-desc">
+          Add custom CSS to further style the app. Use :root for global variables.
+        </p>
+        <textarea
+          class="css-editor"
+          [(ngModel)]="customCss"
+          (ngModelChange)="onCustomCssChange()"
+          placeholder=":root {&#10;  /* your overrides */&#10;}"
+          rows="8"
+          spellcheck="false"
+        ></textarea>
+      </section>
+
+      <!-- Live preview area -->
+      <section class="theme-section">
+        <h3 class="section-title">Preview</h3>
+        <p class="section-desc">Live preview of your theme. Uses the same sanitization as the app.</p>
+        <div
+          #previewContainer
+          class="theme-preview-area"
+          [attr.style]="previewStyle()"
+        >
+          <div class="preview-mockup">
+            <div class="preview-sidebar"></div>
+            <div class="preview-main">
+              <div class="preview-header"></div>
+              <div class="preview-messages">
+                <div class="preview-msg">
+                  <span class="preview-avatar"></span>
+                  <span class="preview-username">username</span>
+                  <span class="preview-msg-text">Preview message using your theme colors.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      @if (saveError) {
+        <p class="save-error">{{ saveError }}</p>
+      }
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+      <button
+        type="button"
+        class="btn-save"
+        (click)="save()"
+        [disabled]="saving"
+      >
+        {{ saving ? 'Saving…' : 'Save' }}
+      </button>
+    </footer>
+  </div>
+</div>

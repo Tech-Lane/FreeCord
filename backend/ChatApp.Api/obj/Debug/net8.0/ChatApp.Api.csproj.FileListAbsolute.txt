@@ -135,3 +135,4 @@ C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Api\bin\Debug\net8.0\Go
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Api\bin\Debug\net8.0\Grpc.Core.Api.dll
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Api\bin\Debug\net8.0\Grpc.Net.Client.dll
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Api\bin\Debug\net8.0\Grpc.Net.Common.dll
+C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Api\obj\Debug\net8.0\ChatApp.Api.sourcelink.json

@@ -13,3 +13,4 @@ c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Data\obj\Debug\net8.0\C
 c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Data\obj\Debug\net8.0\refint\ChatApp.Data.dll
 c:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Data\obj\Debug\net8.0\ChatApp.Data.pdb
 C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Data\obj\Debug\net8.0\ref\ChatApp.Data.dll
+C:\Users\Lanew\OneDrive\Desktop\FreeCord\backend\ChatApp.Data\obj\Debug\net8.0\ChatApp.Data.sourcelink.json

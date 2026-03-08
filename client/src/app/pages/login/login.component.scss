@@ -33,6 +33,15 @@
   font-size: var(--text-sm);
 }
 
+.login-error {
+  margin: 0;
+  padding: var(--spacing-sm);
+  font-size: var(--text-sm);
+  color: var(--status-busy);
+  background: rgba(242, 63, 67, 0.1);
+  border-radius: var(--radius-md);
+}
+
 .login-form {
   display: flex;
   flex-direction: column;

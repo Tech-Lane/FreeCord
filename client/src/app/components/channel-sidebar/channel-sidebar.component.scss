@@ -82,3 +82,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.channel-voice-status {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  color: var(--accent-color);
+}
+
+.channel-voice-error {
+  margin: var(--spacing-sm) var(--spacing-md) 0;
+  padding: var(--spacing-sm);
+  font-size: var(--text-sm);
+  color: var(--danger-color, #ef4444);
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+}

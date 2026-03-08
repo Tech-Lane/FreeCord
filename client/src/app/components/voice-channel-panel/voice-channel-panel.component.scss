@@ -1,0 +1,106 @@
+/**
+ * Voice channel panel styles.
+ * Grid of avatars with active speaker glow and mute overlay.
+ */
+.voice-channel-panel {
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.voice-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.voice-panel-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-main);
+}
+
+.voice-panel-count {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.voice-participants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.voice-avatar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  position: relative;
+
+  /* Glowing border for active speaker */
+  &.voice-avatar-speaking .voice-avatar {
+    box-shadow: 0 0 0 2px var(--accent-color), 0 0 12px var(--accent-muted);
+    animation: voice-speak-glow 1.2s ease-in-out infinite;
+  }
+}
+
+.voice-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: rgba(255, 255, 255, 0.9);
+  transition: box-shadow var(--transition-normal);
+}
+
+.voice-muted-icon {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--status-busy);
+  color: white;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 2px solid var(--bg-tertiary);
+}
+
+.voice-username {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-panel-empty {
+  grid-column: 1 / -1;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+  padding: var(--spacing-sm);
+}
+
+/* Active speaker glow animation */
+@keyframes voice-speak-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px var(--accent-color), 0 0 12px var(--accent-muted);
+  }
+  50% {
+    box-shadow: 0 0 0 3px var(--accent-color), 0 0 18px var(--accent-muted);
+  }
+}
